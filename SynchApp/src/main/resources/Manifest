@@ -1,0 +1,92 @@
+{
+  "app_name": "Synch BigId & Salesforce categories",
+  "description": "Synch application for Synching BigId & Salesforce categories",
+  "category": "privacy",
+  "license_type":"PAID",
+  "vendor": "YoYa LLC",
+  "license_verification_key": "",
+  "global_params": [
+    
+  ],
+  "actions": [      
+    {
+      "action_id": "SynchBigIdSalesforceCategories",
+      "description": "Run the synch application",
+      "is_sync": false,
+      "action_params": [			
+			{
+			"param_name": "LogLevel" ,
+			"param_type": "String" ,
+			"is_cleartext": true ,
+			"param_description": "LogLevel for the synch application" ,
+			"default_value": "fine" ,
+			"param_priority": "primary" ,
+			"is_mandatory": true
+			},
+			{
+			"param_name": "SYNCH_CATEGORY_TO_SALESFORCE" ,
+			"param_type": "String" ,
+			"is_cleartext": true ,
+			"param_description": "A flag for deciding if categories from BigId should be synched to Salesorce." ,
+			"default_value": "true" ,
+			"param_priority": "primary" ,
+			"is_mandatory": true
+			},
+			{
+			"param_name": "UPDATE_SF_TO_REFLECT_BIGID" ,
+			"param_type": "String" ,
+			"is_cleartext": true ,
+			"param_description": "A flag for deciding if the update from BigId will overwrite or append categories to Saleforce complianceGroup filelds." ,
+			"default_value": "true" ,
+			"param_priority": "primary" ,
+			"is_mandatory": true
+			},
+			{
+			"param_name": "USE_SSL_CERTIFICATE" ,
+			"param_type": "String" ,
+			"is_cleartext": true ,
+			"param_description": "A flag to bypass the need for ssl in development." ,
+			"default_value": "false" ,
+			"param_priority": "primary" ,
+			"is_mandatory": true
+			},			
+			{
+			"param_name": "Salesforce_url" ,
+			"param_type": "String" ,
+			"is_cleartext": true ,
+			"param_description": "Salesforce endpoint url" ,
+			"default_value": "https://login.salesforce.com/services/Soap/c/49.0" ,
+			"param_priority": "primary" ,
+			"is_mandatory": true
+			},
+			{
+			"param_name": "Salesforce_username" ,
+			"param_type": "String" ,
+			"is_cleartext": false ,
+			"param_description": "Salesforce username" ,
+			"default_value": "yorammelnik@gmail.com" ,
+			"param_priority": "primary" ,
+			"is_mandatory": true
+			},
+			{
+			"param_name": "Salesforce_password" ,
+			"param_type": "String" ,
+			"is_cleartext": false ,
+			"param_description": "Salesforce password" ,
+			"default_value": "Koper0520" ,
+			"param_priority": "primary" ,
+			"is_mandatory": true
+			},
+			{
+			"param_name": "Salesforce_token" ,
+			"param_type": "String" ,
+			"is_cleartext": false ,
+			"param_description": "Salesforce token retrieved from Admin pages in Salesforce" ,
+			"default_value": "lg9uKgktCDpPtglUSo3cV0oE" ,
+			"param_priority": "primary" ,
+			"is_mandatory": true
+			}
+		]
+    }
+  ]
+}

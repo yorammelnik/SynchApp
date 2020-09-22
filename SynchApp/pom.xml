@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.2.4.RELEASE</version>
+        <!--		<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
+    </parent>
+    <groupId>SynchApp</groupId>
+    <artifactId>basic-demo-app</artifactId>
+    <version>0.0.7-SNAPSHOT</version>
+    <name>SynchApp</name>
+    <description>An app the syncs BigId and Salesforce categories</description>
+
+    <properties>
+        <java.version>11</java.version>
+    </properties>
+
+    <dependencies>
+    
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+  			 	<exclusion>
+      				<groupId>org.springframework.boot</groupId>
+      				<artifactId>spring-boot-starter-logging</artifactId>
+    			</exclusion>
+  			</exclusions>			
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+
+        <!--        Use this in order to get the infra from jfrog (internal BigID developer) -->
+   <!--     <dependency>  -->
+     <!--       <groupId>com.bigid.appinfra</groupId>  -->
+     <!--       <artifactId>app-infrastructure</artifactId>  -->
+      <!--      <version>${project.version}</version>  -->
+      <!--   </dependency>  -->
+
+        <!--        Use this in order to get the infra from local jar dependency (external BigID developer)-->
+        <dependency>
+            <groupId>com.bigid.appinfra</groupId>
+            <artifactId>app-infrastructure</artifactId>
+            <version>0.0.6-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>
+                ${project.basedir}/src/main/resources/dependencies/app-infrastructure/0.0.6-SNAPSHOT/app-infrastructure-0.0.6-SNAPSHOT-jar-with-dependencies.jar
+            </systemPath>
+        </dependency>   
+		
+		<dependency>
+		    <groupId>SalesForce</groupId>
+		    <artifactId>SalesforceEnterpriseClientStub.jar</artifactId>
+		    <version>1.0</version>
+		    <scope>system</scope>
+		    <systemPath>${project.basedir}/src/main/resources/dependencies/SalesforceEnterpriseClientStub.jar</systemPath>		    
+		</dependency>		
+		<dependency>
+		    <groupId>SalesForce</groupId>
+		    <artifactId>SalesforceMetadataClientStub.jar</artifactId>
+		    <version>1.0</version>
+		    <scope>system</scope>
+		    <systemPath>${project.basedir}/src/main/resources/dependencies/SalesforceMetadataClientStub.jar</systemPath>		    
+		</dependency>		
+		<dependency>
+		    <groupId>SalesForce</groupId>
+		    <artifactId>tooling.jar</artifactId>
+		    <version>1.0</version>
+		    <scope>system</scope>
+		    <systemPath>${project.basedir}/src/main/resources/dependencies/tooling.jar</systemPath>		    
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/io.github.hakky54/sslcontext-kickstart -->
+		<dependency>
+		    <groupId>io.github.hakky54</groupId>
+		    <artifactId>sslcontext-kickstart</artifactId>
+		    <version>4.1.0</version>
+		</dependency>	        
+        
+        		<dependency>
+		  <groupId>org.apache.httpcomponents</groupId>
+		  <artifactId>httpclient</artifactId>
+		  <version>4.5.12</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.json</groupId>
+		  <artifactId>json</artifactId>
+		  <version>20180813</version>  
+		</dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.10</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.5.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.2</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.antlr</groupId>
+        	<artifactId>antlr-runtime</artifactId>
+        	<version>3.5.2</version>
+        </dependency>
+        <dependency>
+        	<groupId>com.force.api</groupId>
+        	<artifactId>force-wsc</artifactId>
+        	<version>49.3.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/rhino/js -->
+        <dependency>
+            <groupId>rhino</groupId>
+            <artifactId>js</artifactId>
+            <version>1.7R2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+	    <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.antlr/ST4 -->
+		<dependency>
+		    <groupId>org.antlr</groupId>
+		    <artifactId>ST4</artifactId>
+		    <version>4.3.1</version>
+		</dependency>
+        <!-- https://mvnrepository.com/artifact/com.sun/tools -->
+       <!-- <systemPath>${project.basedir}/src/main/resources/dependencies/SynchBigIdSalesforceCategories.jar</systemPath> -->
+			
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.2.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.github.hakky54/sslcontext-kickstart -->
+		<dependency>
+		    <groupId>io.github.hakky54</groupId>
+		    <artifactId>sslcontext-kickstart</artifactId>
+		    <version>4.1.0</version>
+		</dependency>	
+		<dependency>
+        	<groupId>org.slf4j</groupId>
+       		<artifactId>slf4j-api</artifactId>
+       		<version>1.7.5</version>
+       		<exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+            </exclusion>
+        </exclusions>
+   		</dependency>
+	  	<dependency>
+	       <groupId>org.slf4j</groupId>
+	       <artifactId>slf4j-simple</artifactId>
+	       <version>1.6.4</version>
+	    </dependency>
+	    <!-- https://mvnrepository.com/artifact/javax.xml.parsers/jaxp-api -->
+	    <dependency>
+  		  	<groupId>com.google.guava</groupId>
+    	  	<artifactId>guava</artifactId>
+    		<version>23.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j -->
+		<!-- https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j -->
+<dependency>
+    <groupId>net.lingala.zip4j</groupId>
+    <artifactId>zip4j</artifactId>
+    <version>2.6.2</version>
+</dependency>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+    				<includeSystemScope>true</includeSystemScope>
+  				</configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                        
+                            <classifier>spring-boot</classifier>
+                            <mainClass>
+                                com.basicapp.basicdemoapp.BasicDemoAppApplication
+                            </mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,657 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>Account.AccountNumber</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.Active__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.AnnualRevenue</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.BillingAddress</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.CleanStatus</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    <types>
+        <members>Account.CustomerPriority__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.Description</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.Fax</members>
+        <name>CustomField</name>
+    </types>
+    
+    <types>
+        <members>Account.Industry</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    
+    
+    
+    <types>
+        <members>Account.Name</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.NumberOfEmployees</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.NumberofLocations__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.OwnerId</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.Ownership</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.Phone</members>
+        <name>CustomField</name>
+    </types>
+    
+    <types>
+        <members>Account.Rating</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.ShippingAddress</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.Sic</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.SLA__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.SLAExpirationDate__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.SLASerialNumber__c</members>
+        <name>CustomField</name>
+    </types>
+    
+    <types>
+        <members>Account.TickerSymbol</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.Type</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.UpsellOpportunity__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account.Website</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <types>
+        <members>Campaign.ActualCost</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.AmountAllOpportunities</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.AmountWonOpportunities</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.BudgetedCost</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    <types>
+        <members>Campaign.EndDate</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.ExpectedResponse</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.ExpectedRevenue</members>
+        <name>CustomField</name>
+    </types>
+    
+    <types>
+        <members>Campaign.IsActive</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    
+    <types>
+        <members>Campaign.Name</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.NumberOfContacts</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.NumberOfConvertedLeads</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.NumberOfLeads</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.NumberOfOpportunities</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.NumberOfResponses</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.NumberOfWonOpportunities</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.NumberSent</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.OwnerId</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.StartDate</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Campaign.Status</members>
+        <name>CustomField</name>
+    </types>
+    
+    <types>
+        <members>Campaign.Type</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.AccountId</members>
+        <name>CustomField</name>
+    </types>
+    
+    <types>
+        <members>Case.ClosedDate</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.ContactEmail</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.ContactFax</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.ContactId</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.ContactMobile</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.ContactPhone</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    <types>
+        <members>Case.EngineeringReqNumber__c</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    
+    <types>
+        <members>Case.IsEscalated</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    <types>
+        <members>Case.Origin</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.OwnerId</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.PotentialLiability__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.Priority</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.Product__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.Reason</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.SLAViolation__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.Status</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Case.Subject</members>
+        <name>CustomField</name>
+    </types>
+    
+    <types>
+        <members>Case.Type</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.AccountId</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.AssistantName</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.AssistantPhone</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.Birthdate</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.CleanStatus</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    <types>
+        <members>Contact.Department</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.Email</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.Fax</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.Name</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    
+    <types>
+        <members>Contact.Languages__c</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    <types>
+        <members>Contact.LeadSource</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.Level__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.MailingAddress</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.MobilePhone</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.Name</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.OtherAddress</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.OtherPhone</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.OwnerId</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Contact.Phone</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    
+    <types>
+        <members>Contact.Title</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <types>
+        <members>Lead.AnnualRevenue</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.Address</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.CleanStatus</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.Company</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    <types>
+        <members>Lead.CurrentGenerators__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.Email</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.Fax</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.Name</members>
+        <name>CustomField</name>
+    </types>
+    
+    <types>
+        <members>Lead.Industry</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    
+    
+    
+    <types>
+        <members>Lead.LeadSource</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.Name</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.NumberOfEmployees</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.NumberofLocations__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.OwnerId</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.Phone</members>
+        <name>CustomField</name>
+    </types>
+    
+    <types>
+        <members>Lead.Primary__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.ProductInterest__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.Rating</members>
+        <name>CustomField</name>
+    </types>
+    
+    <types>
+        <members>Lead.SICCode__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Lead.Status</members>
+        <name>CustomField</name>
+    </types>
+    
+    <types>
+        <members>Lead.Title</members>
+        <name>CustomField</name>
+    </types>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <version>47.0</version>
+</Package>
