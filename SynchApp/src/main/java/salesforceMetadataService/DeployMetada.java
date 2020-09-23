@@ -79,8 +79,6 @@ public class DeployMetada {
             LoggerSingelton.getInstance().getLogger().info("Status is: " + deployResult.getStatus());
             if (!deployResult.isDone() && fetchDetails) {
                 printErrors(deployResult, "Failures for deployment in progress:\n");
-                
-                
             }
         }
         while (!deployResult.isDone());

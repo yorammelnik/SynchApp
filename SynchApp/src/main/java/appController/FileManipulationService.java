@@ -49,7 +49,7 @@ import net.lingala.zip4j.model.enums.EncryptionMethod;
 
 /*
  * @ Author: Yoram Melnik
- * Description: A service calss for working with xml and zip files.
+ * Description: A service class for working with xml and zip files.
  * 
  */
 
@@ -354,7 +354,7 @@ public class FileManipulationService {
 		 * @return void
 		 */
 		public static void addComplianceGroupToZipFile(Boolean OVERWRITE_COMPLIANCE_TAGS, String baseDirectory, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws XMLStreamException, ParserConfigurationException, SAXException, IOException, TransformerException {
-			LoggerSingelton.getInstance().getLogger().info("addComplianceGroupToZip");
+			LoggerSingelton.getInstance().getLogger().info("Start of addComplianceGroupToZip()");
 			
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -367,7 +367,7 @@ public class FileManipulationService {
 			ArrayList<String> filesToManipulate = FileManipulationService.getAllFileList(directoryToZip);
 
 			for (String file : filesToManipulate) {
-				LoggerSingelton.getInstance().getLogger().info("In addComplianceGroupToZipFile().");
+				LoggerSingelton.getInstance().getLogger().info("In addComplianceGroupToZipFile() filesToManipulate loop. Current file is: " + file);
 
 				// -Ignore package.xml file
 				if (file.contains("package.xml")) {	
@@ -389,25 +389,38 @@ public class FileManipulationService {
 					if (field.getNodeName().equals("fields")) {
 						NodeList currFieldTags = field.getChildNodes();
 						String fullName ="";
-
-						// if OVERWRITE_COMPLIANCE_TAGS is true than delete all compliance group tags and next insert the new ones
+						
+						// Add comment here 
+						ArrayList<String> listForHoldingComplianceValues = new ArrayList<String>();
+						
+						// if OVERWRITE_COMPLIANCE_TAGS is true than delete all compliance group tags and later insert the new ones
 						for (int j = 0; j < currFieldTags.getLength(); j++) {
-							Node innerTag = currFieldTags.item(j);						
-							if (OVERWRITE_COMPLIANCE_TAGS && "complianceGroup".equals(innerTag.getNodeName())) {
-								field.removeChild(innerTag);
-							}
+							Node innerTag = currFieldTags.item(j);
 							if ("fullName".equals(innerTag.getNodeName())) {							
 								fullName = innerTag.getTextContent();
 							}
+							// Save the content of the current complianceGroup value. 
+							// If the OVERWRITE_COMPLIANCE_TAGS flag is false than the value will be added to
+							// categories list below to be added again to the new complianceGroup tag. The current tag will be removed.
+							if (! OVERWRITE_COMPLIANCE_TAGS && "complianceGroup".equals(innerTag.getNodeName())) {
+								listForHoldingComplianceValues = addComplianceGroupSeperately(innerTag.getTextContent());
+								field.removeChild(innerTag);
+							}
+							if (OVERWRITE_COMPLIANCE_TAGS && "complianceGroup".equals(innerTag.getNodeName())) {
+								field.removeChild(innerTag);
+							}							
 						}
 						// Add the current field name to the list. later on this list will be reference for deleting fields that
 						// were not retrieved form package.xml					
 						retrievedFieldNamesList.add(extractTableNameFromPath(file) + "." + fullName);
 
-						// add the new complianceGroup tags from newAttributes
-						// the api deals with identical tags being deployed so there is no need to check fo that
-						// TODO - verify that the api deals with duplicate tags
+						// add the new complianceGroup tags from newAttributes												
 						ArrayList<String> categories = findCategoriesForField( directoryToZip ,file, fullName, bigIdColumnsToSynch);
+						// remove all to be sure there are no duplicates and after that add them
+						categories.removeAll(listForHoldingComplianceValues);
+						categories.addAll(listForHoldingComplianceValues);
+						// empty listForHoldingComplianceValues list for the next 
+						listForHoldingComplianceValues = null;
 
 						// add the element only if childs were added - i.e, there are categories to add
 						if (categories!= null && ! categories.isEmpty()) {
@@ -438,6 +451,21 @@ public class FileManipulationService {
 
 			// delete fields in package.xml that were not retrieved from Salesforce
 			deleteFieldsFromPackageXml(packageXmlFile, retrievedFieldNamesList);
+		}
+
+		// A method that extracts from the string the complianceGroup values without the ';' char between them.
+		private static ArrayList<String> addComplianceGroupSeperately( String textContent) {
+			ArrayList<String> seperatedComplianceValues = new ArrayList<String>();
+			int index = 0;
+			for (int i = 0; i < textContent.length(); i++) {				
+				if (textContent.charAt(i) == ';') {					
+					seperatedComplianceValues.add(textContent.substring(index, i));
+					index = i+1;
+				}
+			}
+			// add the last element that has no ';' after it
+			seperatedComplianceValues.add(textContent.substring(index, textContent.length()));
+			return seperatedComplianceValues;
 		}
 
 		/**

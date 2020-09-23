@@ -2,7 +2,7 @@
     <fields>
         <fullName>Address</fullName>
         <trackFeedHistory>false</trackFeedHistory>
-    </fields>
+    <complianceGroup>maya</complianceGroup></fields>
     <fields>
         <fullName>AnnualRevenue</fullName>
         <trackFeedHistory>false</trackFeedHistory>

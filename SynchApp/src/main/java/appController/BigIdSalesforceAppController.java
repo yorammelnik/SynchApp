@@ -15,7 +15,6 @@ import java.util.List;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.http.client.ClientProtocolException;
-import org.json.JSONException;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.bigid.appinfra.appinfrastructure.DTO.ExecutionContext;
@@ -32,6 +31,9 @@ import salesforceMetadataService.SalesforceMetadataService;
  * @ Author: Yoram Melnik
  * Description: A class that manages the connection and synchronization of Metadata fields between BigId and Salesforce 
  * The class contains the main method for initiating the app.
+ * This class can be "launched" in 2 ways:
+ * 1. Launched from ide "run configuration" and then the configuration.xml files is used to initialize all data members.
+ * 2. Launched from BigId as an application using the application framework. Data members are set via executionContext received from BigId action.
  * 
  */
 
@@ -43,18 +45,25 @@ public class BigIdSalesforceAppController {
 	private Boolean UPDATE_SF_TO_REFLECT_BIGID = false;
 
 	// set this flag to true in configuration.xml if working in development with no ssl certificates
-	private Boolean USE_SSL_CERTIFICATE = false;
+	private Boolean BYPASS_SSL_CERTIFICATE = false;
 
+	// A flag signaling if the app will update SalesForce with BigId categories
 	private Boolean SYNCH_CATEGORY_TO_SALESFORCE = true;
-	private SalesforceMetadataService salesforceMetaConnectionService = new SalesforceMetadataService(); 
-
+	// If setContextActionParams() method is called than it means that BigId app framework launched the class. The flag is set 
+	// to true in order to prevent initializing data members from configuration.xml and initiating a postConnect call to BigId.
 	private Boolean APP_INITIATED_FROM_BIGID = false;
+	
+	private SalesforceMetadataService salesforceMetaConnectionService = new SalesforceMetadataService(); 
 
 	// Connection fields retrieved from BigId action
 	private String BigId_url;
+	
+	// Token data member is either received form BigId via executionContext or form postConnect method in bigIdServices.
 	private String BigId_Token = null;
+	// Username and password are for running the app from eclipse and therefore a connection to BigId should be established
 	private String BigId_userName;
 	private String BigId_password;
+	
 	private String Salesforce_url;
 	private String Salesforce_username;
 	private String Salesforce_password;
@@ -90,9 +99,10 @@ public class BigIdSalesforceAppController {
 		LoggerSingelton.setLogLevel(args[0]);	
 		this.SYNCH_CATEGORY_TO_SALESFORCE = new Boolean(args[1]);
 		this.UPDATE_SF_TO_REFLECT_BIGID = new Boolean(args[2]);
-		this.USE_SSL_CERTIFICATE = new Boolean(args[3]);	
+		this.BYPASS_SSL_CERTIFICATE = new Boolean(args[3]);	
 		this.BigId_url = executionContext.getBigidBaseUrl().substring (0, (executionContext.getBigidBaseUrl().length()-8));
 		this.BigId_Token = executionContext.getBigidToken();
+		// Username and password are for running the app from eclipse and therefore a connection to BigId should be established
 		this.BigId_userName = null;
 		this.BigId_password = null;
 		this.Salesforce_url = args[4];
@@ -104,7 +114,7 @@ public class BigIdSalesforceAppController {
 
 	}
 
-	// A method to convert form List to String[] array
+	// A method that converts from List to String[] array
 	private String[] list2Array(List<ParamDetails> actionParams) {
 		String[] params = new String[actionParams.size()];
 		int i = 0;
@@ -130,16 +140,16 @@ public class BigIdSalesforceAppController {
 
 		try {
 
-			// Load configuration file if the app is NOT called from BigId but from main(String[] args)
+			// Load configuration file. If the app is NOT called from BigId but from main(String[] args) than the data from
+			// from the configuration.xml actually is used to initialize data members
 			configurationXml = loadConfiguration();
-			// set the booleans from the configuration xml
-
-			// Either take parameters from the action sent from BigId or from configuration file
+			
+			// Initialize data members from configuration file
 			if (! APP_INITIATED_FROM_BIGID) {				
 
 				this.SYNCH_CATEGORY_TO_SALESFORCE = configurationXml.getSynch_categories_to_Salesforce();
 				this.UPDATE_SF_TO_REFLECT_BIGID = configurationXml.getUPDATE_SF_TO_REFLECT_BIGID();
-				this.USE_SSL_CERTIFICATE = configurationXml.getUSE_SSL_CERTIFICATE();
+				this.BYPASS_SSL_CERTIFICATE = configurationXml.getUSE_SSL_CERTIFICATE();
 				this.BigId_url = configurationXml.getBigId_url();
 				this.BigId_userName = configurationXml.getBigId_userName();
 				this.BigId_password = configurationXml.getBigId_password();
@@ -156,9 +166,10 @@ public class BigIdSalesforceAppController {
 			LoggerSingelton.getInstance().getLogger().info("Conncetion to Salesforce succeded.");
 
 			// Create a a BigId  service
-			bigIdConnectionService = new BigIdService(USE_SSL_CERTIFICATE,BigId_url ,BigId_userName , BigId_password, BigId_Token);
+			bigIdConnectionService = new BigIdService(BYPASS_SSL_CERTIFICATE,BigId_url ,BigId_userName , BigId_password, BigId_Token);
 
-			// Only initiate a connection to BigId if the app is NOT called from BigId. If called from BigId a connection is already established and a token is provided	
+			// Only initiate a connection to BigId if the app is NOT called from BigId. 
+			// If the app is called from BigId a connection is already established and a token is provided in the executionContext	
 			if (! APP_INITIATED_FROM_BIGID) {
 				LoggerSingelton.getInstance().getLogger().info("Trying to connect to BigId.");			
 				bigIdConnectionService.postConnect();
@@ -192,6 +203,8 @@ public class BigIdSalesforceAppController {
 			LoggerSingelton.getInstance().getLogger().info("After salesforceMetaConnectionService.deployAttributes. UPDATE_SF_TO_REFLECT_BIGID flag is " + UPDATE_SF_TO_REFLECT_BIGID);	
 
 		}		
+		// All exception are caught and written to log file and than a new exception is thrown to 
+		// indicate to BigId that the action did not complete correctly
 		catch (Exception e) {	
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
@@ -312,6 +325,7 @@ public class BigIdSalesforceAppController {
 	}
 
 	// reutrn the log file of the application as a String
+	// This method is called from LogsController to return the logs to BigId when required
 	public static String getLogfile() throws FileNotFoundException {
 		return LoggerSingelton.getLogFile();
 	}

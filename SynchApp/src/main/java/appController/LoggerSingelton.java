@@ -11,7 +11,7 @@ import java.util.logging.SimpleFormatter;
 
 
 /*
- * A singelton class for logging 
+ * A singelton class for logging info and errors to log file
  */
 public class LoggerSingelton {	
 
@@ -19,8 +19,6 @@ public class LoggerSingelton {
 	private static LoggerSingelton logger_instance = null;
 	FileHandler fHandler;
 
-	//TRACE	DEBUG	INFO	WARN	ERROR	OFF
-	//private static final Logger logger = (Logger) LoggerFactory.getLogger(BigIdSalesforceAppController.class);
 	private static final Logger logger = Logger.getLogger(BigIdSalesforceAppController.class.getName());
 
 	// private constructor restricted to this class itself 

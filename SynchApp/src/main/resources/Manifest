@@ -42,7 +42,7 @@
 			"is_mandatory": true
 			},
 			{
-			"param_name": "USE_SSL_CERTIFICATE" ,
+			"param_name": "BYPASS_SSL_CERTIFICATE" ,
 			"param_type": "String" ,
 			"is_cleartext": true ,
 			"param_description": "A flag to bypass the need for ssl in development." ,

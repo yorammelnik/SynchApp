@@ -2,7 +2,7 @@
     <fields>
         <fullName>AccountNumber</fullName>
         <trackFeedHistory>false</trackFeedHistory>
-    </fields>
+    <complianceGroup>Gilad</complianceGroup></fields>
     <fields>
         <fullName>Active__c</fullName>
         <externalId>false</externalId>
@@ -32,8 +32,9 @@
     </fields>
     <fields>
         <fullName>BillingAddress</fullName>
+        
         <trackFeedHistory>false</trackFeedHistory>
-    </fields>
+    <complianceGroup>YoYa;Gilad;Yoram;maya;yael;Course125;rtytuu</complianceGroup></fields>
     <fields>
         <fullName>CleanStatus</fullName>
         <trackFeedHistory>false</trackFeedHistory>
@@ -79,11 +80,11 @@
         <fullName>Industry</fullName>
         <trackFeedHistory>false</trackFeedHistory>
         <type>Picklist</type>
-    </fields>
+    <complianceGroup>Gilad</complianceGroup></fields>
     <fields>
         <fullName>Name</fullName>
         <trackFeedHistory>true</trackFeedHistory>
-    </fields>
+    <complianceGroup>Gilad</complianceGroup></fields>
     <fields>
         <fullName>NumberOfEmployees</fullName>
         <trackFeedHistory>false</trackFeedHistory>

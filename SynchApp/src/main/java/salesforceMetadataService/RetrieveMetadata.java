@@ -43,7 +43,7 @@ import appController.LoggerSingelton;
 import bigIdService.ColumnToSynch;
 
 
-/*
+/**
  * @ Author: Yoram Melnik
  * Description: A class that handles the retrieval of metadata form Salesforce
  * 
@@ -74,6 +74,9 @@ public class RetrieveMetadata {
 	}
 
 
+	/**
+	 * Set the zip file to be sent to Salesforce to retrieve the metadata fields.
+	 */
 	public File retrieveZip(ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws RemoteException, Exception
 	{
 		LoggerSingelton.getInstance().getLogger().info("Beginning of retrieveZipFile()");
@@ -144,6 +147,9 @@ public class RetrieveMetadata {
 
 	}
 
+	/**
+	 * Set the data to be sent to Salesforce from bigIdColumnsToSynch list.
+	 */
 	private void setUnpackaged(RetrieveRequest request, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws SecurityException, IOException {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of setUnpackaged()");		
 
@@ -168,51 +174,7 @@ public class RetrieveMetadata {
 
 		request.setUnpackaged(r);		
 	}
-
-	private com.sforce.soap.metadata.Package parsePackage(File file) throws Exception {
-		try {
-			LoggerSingelton.getInstance().getLogger().info("Beginning of parsePackage()");
-
-			InputStream is = new FileInputStream(file);
-			List<PackageTypeMembers> pd = new ArrayList<PackageTypeMembers>();
-			DocumentBuilder db =
-					DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			Element d = db.parse(is).getDocumentElement();
-			for (Node c = d.getFirstChild(); c != null; c = c.getNextSibling()) {
-				if (c instanceof Element) {
-					Element ce = (Element)c;
-					//
-					NodeList namee = ce.getElementsByTagName("name");
-					if (namee.getLength() == 0) {
-						// not
-						continue;
-					}
-					String name = namee.item(0).getTextContent();
-					NodeList m = ce.getElementsByTagName("members");
-					List<String> members = new ArrayList<String>();
-					for (int i = 0; i < m.getLength(); i++) {
-						Node mm = m.item(i);
-						members.add(mm.getTextContent());
-					}
-					PackageTypeMembers pdi = new PackageTypeMembers();
-					pdi.setName(name);
-					pdi.setMembers(members.toArray(new String[members.size()]));
-					pd.add(pdi);
-				}
-			}
-			com.sforce.soap.metadata.Package r = new com.sforce.soap.metadata.Package();
-			r.setTypes(pd.toArray(new PackageTypeMembers[pd.size()]));
-			r.setVersion(API_VERSION + "");
-			return r;
-		} catch (ParserConfigurationException pce) {
-			throw new Exception("Cannot create XML parser", pce);
-		} catch (IOException ioe) {
-			throw new Exception(ioe);
-		} catch (SAXException se) {
-			throw new Exception(se);
-		}
-	}	
-
+	
 	/**
 	 * Helper method to copy from a readable channel to a writable channel,
 	 * using an in-memory buffer.

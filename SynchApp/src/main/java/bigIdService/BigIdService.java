@@ -8,12 +8,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
@@ -22,18 +19,15 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
-import org.apache.tomcat.jni.SSLContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import appController.LoggerSingelton;
 import appController.ResponseNotOKException;
-import nl.altindag.sslcontext.SSLFactory;
 
 /*
  * @ Author: Yoram Melnik
@@ -83,9 +77,15 @@ public class BigIdService {
 		USE_SSL_CERTIFICATE = useSSLCertificate;		
 	}
 
-	private HttpClient createClient() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-		// Use sslcontext library to deal with BigId instance in Development without SSL certificate
-		// use this only when there isn't a certificate in the BigId environment.
+	/**
+	 * A method for creating an httpClient.
+	 * Use sslcontext library to deal with BigId instance in Development without SSL certificate
+	 * use this only when there isn't a certificate in the BigId environment.
+	 * @throws IOException 
+	 * @throws SecurityException 
+	 */
+	private HttpClient createClient() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, SecurityException, IOException {
+		LoggerSingelton.getInstance().getLogger().info("Beginning of createClient())");
 		if (USE_SSL_CERTIFICATE) {	
 			javax.net.ssl.SSLContext sslcontext = SSLContexts
 					.custom()
@@ -137,7 +137,6 @@ public class BigIdService {
 		httpPostRequest.setConfig(timeoutParams);		
 
 		createClient();
-
 		// execute and convert response to json object
 		HttpResponse response = client.execute(httpPostRequest);
 		proccessHttpResponse(response, loginUrl);
@@ -161,9 +160,6 @@ public class BigIdService {
 	 */
 	public ArrayList<String> getCategories() throws ClientProtocolException, IOException, ResponseNotOKException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of getCategories() {}");
-
-
-
 		String uri = URL + API + VERSION + DATA_CATEGORIES;
 
 		HttpGet getRequest = new HttpGet(uri);
@@ -215,8 +211,6 @@ public class BigIdService {
 
 		// Loop through the array and execute each category individually
 		for (int i = 0; i < newCategoriesJsonArray.length(); i++) {
-
-
 
 			HttpPost httpPostRequest = new HttpPost(uri);	
 			httpPostRequest.setHeader("Authorization", TOKEN);
@@ -271,13 +265,11 @@ public class BigIdService {
 
 		for (Iterator iterator = salesforceRelatedObjects.iterator(); iterator.hasNext();) {	
 
-
-
 			JSONObject objectToSynch = (JSONObject) iterator.next();
 			String currObject = objectToSynch.getString("fullyQualifiedName");
 			LoggerSingelton.getInstance().getLogger().info("getObjectsToSynch, Current object is: " + currObject);
 
-			/* TODO - for debug purposes 
+			/* TODO - for debug purposes - work with one table only
 			if (  ! currObject.equals("Salesforce.Account")  ) {
 				continue;
 			}
@@ -545,12 +537,9 @@ public class BigIdService {
 	 */
 	private ArrayList<JSONObject> getSalesforceObjectsFromDb() throws ResponseNotOKException, ParseException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		LoggerSingelton.getInstance().getLogger().fine("Beginning of getSalesforceObjectsFromDb()");
-
-		// TODO - delete requireTotalCount=true		
-
+		
 		String uri =  URL + API + VERSION + "/data-catalog?format=json&&sort=&filter=system=Salesforce";
-		//String uri =  URL + API + VERSION + "/data-catalog?format=json&requireTotalCount=true&&sort=&filter=system=Salesforce";		
-
+		
 		ArrayList<JSONObject> salesforceObjects = new ArrayList<JSONObject>();
 
 		HttpGet getRequest = new HttpGet(uri);
