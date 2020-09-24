@@ -29,10 +29,10 @@ import salesforceMetadataService.SalesforceMetadataService;
 
 /*
  * @ Author: Yoram Melnik
- * Description: A class that manages the connection and synchronization of Metadata fields between BigId and Salesforce 
+ * Description: A class that manages the connection and synchronization of complianceGroup metadata fields between BigId and Salesforce 
  * The class contains the main method for initiating the app.
  * This class can be "launched" in 2 ways:
- * 1. Launched from ide "run configuration" and then the configuration.xml files is used to initialize all data members.
+ * 1. Launched from ide "run configuration" and then the configuration.xml file is used to initialize all data members.
  * 2. Launched from BigId as an application using the application framework. Data members are set via executionContext received from BigId action.
  * 
  */

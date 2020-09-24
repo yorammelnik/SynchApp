@@ -1,7 +1,5 @@
 package SpringApp.Controllers;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -10,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.bigid.appinfra.appinfrastructure.Controllers.AbstractExecutionController;
 import com.bigid.appinfra.appinfrastructure.DTO.ActionResponseDetails;
 import com.bigid.appinfra.appinfrastructure.DTO.ExecutionContext;
-import com.bigid.appinfra.appinfrastructure.DTO.ParamDetails;
 import com.bigid.appinfra.appinfrastructure.DTO.StatusEnum;
 
 import SpringApp.Services.ExecutionService;

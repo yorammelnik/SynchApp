@@ -1,5 +1,5 @@
 {
-  "app_name": "Synch BigId & Salesforce categories",
+  "app_name": "BigId & Salesforce App",
   "description": "Synch application for Synching BigId & Salesforce categories",
   "category": "privacy",
   "license_type":"PAID",
@@ -33,7 +33,7 @@
 			"is_mandatory": true
 			},
 			{
-			"param_name": "UPDATE_SF_TO_REFLECT_BIGID" ,
+			"param_name": "OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID" ,
 			"param_type": "String" ,
 			"is_cleartext": true ,
 			"param_description": "A flag for deciding if the update from BigId will overwrite or append categories to Saleforce complianceGroup filelds." ,

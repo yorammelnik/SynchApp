@@ -150,7 +150,7 @@ public class FileManipulationService {
 	 * @param 
 	 * @return outputDirectory String 
 	 * @throws Exception 
-	 * 
+	 *
 	 */
 	public static String extractZipFile(String zipFilePath, String outputDirectory) throws XMLStreamException, IOException {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of readZipFile()");		
@@ -195,83 +195,18 @@ public class FileManipulationService {
 	}
 
 
-	/**
-	 * Description: Extract zip file retrieved from Salesfgorce
-	 * @param 
-	 * @return outputDirectory String 
-	 * @throws IOException 
-	 * @throws SecurityException 
-	 * @throws Exception 
-	 * 
-	 */
-	public static void writeZipFile(File directoryToZip, List<File> fileList, String zipFilePathName) throws SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of writeZipFile");
-
-		try {
-			FileOutputStream fos = new FileOutputStream(zipFilePathName);
-			ZipOutputStream zos = new ZipOutputStream(fos);
-			zos.setMethod(ZipOutputStream.DEFLATED);
-			zos.setLevel(4);
-
-			for (File file : fileList) {
-				if (!file.isDirectory()) { // we only zip files, not directories
-					addToZip(directoryToZip, file, zos);
-				}
-			}
-			zos.close();
-			fos.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-
+	
 	/**
 	 * @param salesforce_token the salesforce_token to set
 	 * @return the salesforce_token
 	 * @throws Exception 
-	 * 
-	 */
-	public static void addToZip(File directoryToZip, File file, ZipOutputStream zos) throws FileNotFoundException,
-	IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of addToZip");
-		FileInputStream fis = new FileInputStream(file);
-
-		// we want the zipEntry's path to be a relative path that is relative
-		// to the directory being zipped, so chop off the rest of the path
-		String zipFilePath = file.getCanonicalPath().substring(directoryToZip.getCanonicalPath().length() + 1,file.getCanonicalPath().length());
-		
-		LoggerSingelton.getInstance().getLogger().info("Writing '" + zipFilePath + "' to zip file");
-		ZipEntry zipEntry = new ZipEntry(zipFilePath);
-		//zipEntry.setCompressedSize(0);
-		zipEntry.setSize(file.length());
-		zos.putNextEntry(zipEntry);		
-
-		byte[] bytes = new byte[1024];
-		int length;
-		while ((length = fis.read(bytes)) >= 0) {			
-			zos.write(bytes, 0, length);
-		}
-
-		zos.closeEntry();
-		fis.close();
-	}
-
-
-	/**
-	 * @param salesforce_token the salesforce_token to set
-	 * @return the salesforce_token
-	 * @throws Exception 
-	 * 
+	 *  
 	 */
 	public static void zip(String zipFileString, String directoryToZip) throws IOException, ZipException {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of zip().");
 		
 		ArrayList<File> fileList = new ArrayList<File>();
-		getAllFiles(new File(directoryToZip), fileList);
-		//writeZipFile(new File(directoryToZip), fileList, zipFileString);	
+		getAllFiles(new File(directoryToZip), fileList);			
 
 		ZipParameters parameters = new ZipParameters();
 		parameters.setCompressionMethod(CompressionMethod.DEFLATE);   //(Zip4jConstants.COMP_DEFLATE);
@@ -284,8 +219,7 @@ public class FileManipulationService {
 		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
 		out.close();
 		
-		ZipFile zip = new ZipFile(zipFile);
-		//zip.addFiles(fileList, parameters);
+		ZipFile zip = new ZipFile(zipFile);		
 		
 		zip.addFolder(new File(directoryToZip), parameters);		
 		
@@ -320,8 +254,7 @@ public class FileManipulationService {
 
 
 		/**
-		 * @param salesforce_token the salesforce_token to set
-		 * @return the salesforce_token
+		 * A method that add all the files and directories from a specific input directory to the input fileList 
 		 * @throws IOException 
 		 * @throws SecurityException 
 		 * @throws Exception 
@@ -347,7 +280,7 @@ public class FileManipulationService {
 			}
 		}
 		/**
-		 * 
+		 * A method that updates all the categories that need to be updated to Salesforce
 		 * @param OVERWRITE_COMPLIANCE_TAGS
 		 * @param baseDirectory
 		 * @param newAttributes
@@ -469,8 +402,8 @@ public class FileManipulationService {
 		}
 
 		/**
-		 * @param salesforce_token the salesforce_token to set
-		 * @return the salesforce_token
+		 * @param extract the table name from the path
+		 * @return String - fileName
 		 * @throws IOException 
 		 * @throws SecurityException 
 		 * @throws Exception 
@@ -486,9 +419,10 @@ public class FileManipulationService {
 		}
 
 		/**
-		 * @param salesforce_token the salesforce_token to set
-		 * @return the salesforce_token
-		 * @throws Exception 
+		 * Update the package.xml to reflect the exact fields that are sent in the *.object files.
+		 * the package.xml has all the requested fields and therefore the fields that cannot be updated should be deleted from the file.
+		 * @return void
+		 * @throws ParserConfigurationException, SAXException, IOException, TransformerException 
 		 * 
 		 */
 		private static void deleteFieldsFromPackageXml(String packageXmlFile, ArrayList<String> retrievedFieldNamesList) throws ParserConfigurationException, SAXException, IOException, TransformerException {
@@ -536,9 +470,9 @@ public class FileManipulationService {
 		}
 
 		/**
-		 * @param salesforce_token the salesforce_token to set
-		 * @return the salesforce_token
-		 * @throws Exception 
+		 * Get the categories for the param field in the specific table
+		 * @return Array list with the categoris for the input field
+		 * @throws IOException 
 		 * 
 		 */
 		private static ArrayList<String> findCategoriesForField(File baseDirectoy, String file, String field, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws IOException{
@@ -557,13 +491,13 @@ public class FileManipulationService {
 		}
 
 		/**
-		 * @param salesforce_token the salesforce_token to set
-		 * @return the salesforce_token
-		 * @throws Exception 
+		 * A method for extracting the full path from the file
+		 * @return String 
+		 * @throws IOException 
 		 * 
 		 */
 		private static String extractFullPathChars(File baseDirectoy, String file) throws IOException {
-			LoggerSingelton.getInstance().getLogger().info("Beginning of extractFullPathChars");
+			//LoggerSingelton.getInstance().getLogger().info("Beginning of extractFullPathChars");
 			File f = new File(file);
 			File directoryToZip = f.getParentFile();
 			// we want the zipEntry's path to be a relative path that is relative
