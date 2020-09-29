@@ -3,6 +3,8 @@ package appController;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -25,7 +27,12 @@ public class LoggerSingelton {
 	// Default level of logging is DEBUG
 	private LoggerSingelton() throws SecurityException, IOException { 
 		logger.setLevel(Level.FINE);
-		fHandler = new FileHandler("C:\\BigIdSynchAppLog\\synchAppLogFile.log");
+		
+		Path resourceDirectory = Paths.get("src","main","resources", "BigIdSalesforceAppLogFile.log");		
+		String absolutePath = resourceDirectory.toFile().getAbsolutePath();
+		
+		fHandler = new FileHandler(absolutePath);
+		//fHandler = new FileHandler("C:\\BigIdSynchAppLog\\synchAppLogFile.log");
 		logger.addHandler(fHandler);
 		SimpleFormatter formatter = new SimpleFormatter();
 		fHandler.setFormatter(formatter);

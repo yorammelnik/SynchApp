@@ -1,20 +1,12 @@
 package salesforceMetadataService;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
@@ -32,9 +24,8 @@ import com.sforce.soap.metadata.StandardValueSet;
 import com.sforce.soap.metadata.UpsertResult;
 import com.sforce.ws.ConnectionException;
 
-import appController.LoggerSingelton;
-import appController.LoginData;
 import appController.FileManipulationService;
+import appController.LoggerSingelton;
 import bigIdService.CategoryColumnContainer;
 import bigIdService.ColumnToSynch;
 import net.lingala.zip4j.exception.ZipException;
