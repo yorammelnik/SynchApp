@@ -6,10 +6,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -33,6 +35,7 @@ import com.sforce.ws.ConnectionException;
 import appController.LoggerSingelton;
 import appController.LoginData;
 import appController.FileManipulationService;
+import bigIdService.CategoryColumnContainer;
 import bigIdService.ColumnToSynch;
 import net.lingala.zip4j.exception.ZipException;
 //import salesforceRestService.SalesforceRestService;
@@ -50,7 +53,20 @@ public class SalesforceMetadataService {
 	private final String COMPLIANCE_GROUP = "ComplianceGroup";
 
 	private MetadataConnection metadataConnection = null;
+	
+	// Directories and files that are used for deployment of the complianceGroup metadata
+	private final String UNZIPPED_DIRECTORY = "unzipped";
+	private final String UNPACKAGED_DIRECTORY = "unpackaged";
+	private final String ZIP_TO_UPLOAD_FILE = "zipToUpload.zip";
+	private final static String RETRIEVE_RESULT = "retrieveResult.zip";
 
+	// This file is used by RetrieveMetada class.
+	// For clarity of all the files used with Salesforce it is declared in this class.
+	public static String getRetrieveResultFile() {
+		return RETRIEVE_RESULT;
+	}
+	
+	
 	// Use MetadateUtil class to connect to Salesforce and return a metadata connection
 	public void connect(String url, String userName, String password, String token) throws ConnectionException, SecurityException, IOException  {
 		LoggerSingelton.getInstance().getLogger().fine("Beginning of connect() {}");
@@ -181,17 +197,44 @@ public class SalesforceMetadataService {
 	private String updateRetrievedData(Boolean OVERWRITE_SF, String retrievedZipFilePath, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws URISyntaxException, XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException, ZipException {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of updateRetrievedData()");
 		
-		String unzippedDirectory = FileManipulationService.extractZipFile(retrievedZipFilePath, new File(retrievedZipFilePath).getParent()+"\\unzipped");
+		Path path = Paths.get(FileManipulationService.getResourceDirectory() + UNZIPPED_DIRECTORY);
+		String unzippedDirectory = FileManipulationService.extractZipFile(retrievedZipFilePath, path.toString() );
+		//String unzippedDirectory = FileManipulationService.extractZipFile(retrievedZipFilePath, new File(  retrievedZipFilePath).getParent() +  UNZIPPED_DIRECTORY );
 		
 		String zipFileParentDirectory = new File(unzippedDirectory).getParent();
 		
 		FileManipulationService.addComplianceGroupToZipFile(OVERWRITE_SF, unzippedDirectory, bigIdColumnsToSynch);
 		
-		String newZipFileToUpload = zipFileParentDirectory+"\\zipToUpload.zip";
-		FileManipulationService.zip(newZipFileToUpload, unzippedDirectory + "\\unpackaged");		
+		Path path2 = Paths.get(FileManipulationService.getResourceDirectory() + ZIP_TO_UPLOAD_FILE);
+		//String newZipFileToUpload = zipFileParentDirectory + ZIP_TO_UPLOAD_FILE;
 		
-		return newZipFileToUpload;		
+		
+		Path path3 = Paths.get(FileManipulationService.getResourceDirectory() , UNZIPPED_DIRECTORY, UNPACKAGED_DIRECTORY);
+		FileManipulationService.zip(path2.toString(), path3.toString());
+		//FileManipulationService.zip(newZipFileToUpload, unzippedDirectory + UNPACKAGED_DIRECTORY);		
+		
+		return path2.toString();		
 
+	}
+	
+	
+	/**	 
+	 * A method that uses SalesforceMetadataService (through RetrieveMetadata) to retrieve the specific fields with their 
+	 * complianceGroup value from Salesforce
+	 * @param ArrayList<ColumnToSynch> columns
+	 * @throws Exception 
+	 * 
+	 */
+	public ArrayList<CategoryColumnContainer> retrieveCorrelationSetColumnsFromSalesforce(ArrayList<ColumnToSynch> columns) throws Exception {
+		LoggerSingelton.getInstance().getLogger().info("Beginning of retrieveCorrelationSetColumns()");
+		
+		RetrieveMetadata ret = new RetrieveMetadata(metadataConnection);
+		File retrieveResult = ret.retrieveZip(columns);
+		
+		ArrayList<String> files = FileManipulationService.getFilesFromZipfile(retrieveResult);
+		
+		return FileManipulationService.readComplianceGroupfieldAndValues(files);		
+			
 	}
 		
 }

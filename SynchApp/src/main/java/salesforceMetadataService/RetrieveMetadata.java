@@ -13,6 +13,9 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,6 +42,7 @@ import com.sforce.soap.metadata.RetrieveStatus;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
+import appController.FileManipulationService;
 import appController.LoggerSingelton;
 import bigIdService.ColumnToSynch;
 
@@ -66,8 +70,7 @@ public class RetrieveMetadata {
 	private static final Double API_VERSION = 47.0; 
 	private static final String API_VERSION_STRING = "47.0";
 	private ArrayList<RetrieveMessage> retrieveWarnings = new ArrayList<RetrieveMessage>();
-
-
+	
 	public RetrieveMetadata(MetadataConnection metadataConnection) 
 			throws ConnectionException {
 		this.metadataConnection = metadataConnection;
@@ -129,19 +132,22 @@ public class RetrieveMetadata {
 
 			// Write the zip to the file system			
 			LoggerSingelton.getInstance().getLogger().info("Writing results to zip file");
-			ByteArrayInputStream bais = new ByteArrayInputStream(result.getZipFile());
-			File resultsFile = new File("retrieveResults.zip");
-			FileOutputStream os = new FileOutputStream(resultsFile);
+			ByteArrayInputStream bais = new ByteArrayInputStream(result.getZipFile());				
+			
+			String path = FileManipulationService.getResourceDirectory();
+			Path resultFilePath = Paths.get(path, SalesforceMetadataService.getRetrieveResultFile());			
+			
+			FileOutputStream os = new FileOutputStream(resultFilePath.toFile());
 			try {
 				ReadableByteChannel src = Channels.newChannel(bais);
 				FileChannel dest = os.getChannel();
 				copy(src, dest);
-				LoggerSingelton.getInstance().getLogger().info("in retrieveZip(). Results written to " + resultsFile.getAbsolutePath());
+				LoggerSingelton.getInstance().getLogger().info("in retrieveZip(). Results written to " + resultFilePath.toFile().getAbsolutePath());
 			} finally {
 				os.close();
 			}
 
-			return resultsFile;
+			return resultFilePath.toFile();
 		}
 		return null;
 
@@ -162,8 +168,13 @@ public class RetrieveMetadata {
 			PackageTypeMembers pdi = new PackageTypeMembers();
 			pdi.setName("CustomField");
 			String[] field = new String[1];
-			field[0] = columnToSynch.getTableFullyQualifiedName() + "." + columnToSynch.getColumnName();
-			//pdi.setMembers(members.toArray(new String[members.size()]));
+			// Make sure tableName and columnName are Capitilsed
+			String tableName = columnToSynch.getTableFullyQualifiedName();
+			String columnName = columnToSynch.getColumnName();
+			String capitaliseTableName = tableName.substring(0, 1).toUpperCase() + tableName.substring(1);
+			String capitalisecolumnName = columnName.substring(0, 1).toUpperCase() + columnName.substring(1);
+			field[0] = capitaliseTableName + "." + capitalisecolumnName;
+			//field[0] = columnToSynch.getTableFullyQualifiedName() + "." + columnToSynch.getColumnName();			
 			pdi.setMembers(field);
 			pd.add(pdi);
 

@@ -26,6 +26,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.gson.JsonArray;
+
 import appController.LoggerSingelton;
 import appController.ResponseNotOKException;
 
@@ -42,6 +44,7 @@ public class BigIdService {
 	private final static String VERSION = "/v1";
 	private final static String SESSIONS = "/sessions";
 	private final static String DATA_CATEGORIES = "/data_categories";
+	private final static String ID_CONNECTIOS = "/id_connections";
 	private static final String ATTRIBUTES = "/attributes";
 	private static final String FORMAT_JSON = "/?format=json";
 
@@ -184,7 +187,7 @@ public class BigIdService {
 		// Set the results into a JSONArray. An array is used because there may be more that on category 
 		JSONArray categories  = new JSONArray(result);
 
-		// Iterate through the JSONAraay and extract all the categories into a categoryList
+		// Iterate through the JSONArray and extract all the categories into a categoryList
 		JSONObject currentJson;
 		for (int i = 0; i < categories.length(); i++) {
 			currentJson = categories.getJSONObject(i);
@@ -537,9 +540,9 @@ public class BigIdService {
 	 */
 	private ArrayList<JSONObject> getSalesforceObjectsFromDb() throws ResponseNotOKException, ParseException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		LoggerSingelton.getInstance().getLogger().fine("Beginning of getSalesforceObjectsFromDb()");
-		
+
 		String uri =  URL + API + VERSION + "/data-catalog?format=json&&sort=&filter=system=Salesforce";
-		
+
 		ArrayList<JSONObject> salesforceObjects = new ArrayList<JSONObject>();
 
 		HttpGet getRequest = new HttpGet(uri);
@@ -591,7 +594,263 @@ public class BigIdService {
 		}
 		else {
 			LoggerSingelton.getInstance().getLogger().severe("Response code for uri" + uri + "is " + statusCode + " response, reasonPhrase:" + response.getStatusLine().getReasonPhrase());
-			throw new ResponseNotOKException("Response code for uri" + uri + "is" +  statusCode);
+			throw new ResponseNotOKException("Response code for uri " + uri + " is" +  statusCode);
 		}
-	}	
+	}
+
+	/**	 
+	 * Get all the relevant columns from the relevan correlationSets 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException 
+	 * @throws IOException 
+	 * @throws SecurityException 
+	 * @throws ResponseNotOKException 
+	 * @throws ParseException 
+	 * 
+	 */
+	public ArrayList<ColumnToSynch> getColumnsFromCorrelationsets() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, SecurityException, IOException, ParseException, ResponseNotOKException {
+		LoggerSingelton.getInstance().getLogger().info("Beginning of BigIdService.getColumnsFromCorrelationsets() {}");
+
+		// https://yoram4.westeurope.cloudapp.azure.com/api/v1/id_connections
+		String uri = URL + API + VERSION + ID_CONNECTIOS;
+
+		HttpGet getRequest = new HttpGet(uri);
+		getRequest.setHeader("Authorization", TOKEN);
+		getRequest.setHeader("Accept", "application/json");
+		getRequest.setHeader("Content-type", "application/json");
+
+		// Set CONNECTION_TIMEOUT seconds timeout for the http call
+		final RequestConfig timeoutParams = RequestConfig.custom().setConnectTimeout(CONNECTION_TIMEOUT).setSocketTimeout(CONNECTION_TIMEOUT).build();
+		getRequest.setConfig(timeoutParams);
+
+		createClient();
+		HttpResponse response = client.execute(getRequest);
+		proccessHttpResponse(response, uri);
+
+		String result = EntityUtils.toString(response.getEntity());
+
+		LoggerSingelton.getInstance().getLogger().info("result string for uri: " + uri + ":" + result);
+
+		// Set the results into a JSONArray.  
+		JSONArray correlationSets  = new JSONObject(result).getJSONArray("id_connections");
+
+		ArrayList<JSONObject> salesForceCorrelationSets = new ArrayList<JSONObject>();
+
+		// Iterate through the JSONAraay and find the correlationSets that are dsConncetion==Salesforce
+		for (int i = 0; i < correlationSets.length(); i++) {
+			JSONObject currentJson = correlationSets.getJSONObject(i);
+			if (currentJson.getString("dsConnection").equals("Salesforce")) {
+				salesForceCorrelationSets.add(currentJson);
+			}			
+		}
+
+		// Iterate over each correlation set and extract all the columns that "selection" is set to true into columnsToRetrieve list
+		ArrayList<ColumnToSynch> columnsToRetrieve = new ArrayList<ColumnToSynch>();		
+		for (Iterator iterator = salesForceCorrelationSets.iterator(); iterator.hasNext();) {
+			JSONObject jsonObject = (JSONObject) iterator.next();
+			JSONArray attributes = jsonObject.getJSONArray("attributes");
+			for (int i = 0; i < attributes.length(); i++) {
+				JSONObject currentJson = (JSONObject) attributes.get(i);
+				if (currentJson.getBoolean("selection")) {
+					String tableName = jsonObject.getString("db_table");
+					ColumnToSynch currColumn = new ColumnToSynch("Salesforce" , tableName );
+					currColumn.setColumnName(currentJson.getString("columnName"));
+					columnsToRetrieve.add(currColumn);
+				}
+			}						
+		}
+		return columnsToRetrieve;
+	}
+
+	/**	 
+	 * A method that updates the correlation page with new complianceGroup values retrieved from Salesforce
+	 * @param ArrayList<CategoryColumnContainer> complianceGroupToUpdate
+	 * @return void
+	 * 
+	 * Throws ResponseNotOKException if response is not OK
+	 * @throws IOException 
+	 * @throws SecurityException 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException 
+	 * @throws ResponseNotOKException 
+	 * @throws ParseException 
+	 */
+	public void updateCorrelationSetWithComplianceGroup(ArrayList<CategoryColumnContainer> complianceGroupToUpdate) throws SecurityException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, ParseException, ResponseNotOKException {
+		LoggerSingelton.getInstance().getLogger().info("Beginning of BigIdService.updateCorrelationSetWithComplianceGroup() {}");
+
+		// Loop through the array and execute each complianceGroup individually only if there are complianceGroupValues for the current column
+		for (int i = 0; i < complianceGroupToUpdate.size(); i++) {
+
+			// first check if there are any complianceGroupValues to update
+			ArrayList<String> complianceGroupValues = complianceGroupToUpdate.get(i).getCategories();
+
+			if (! complianceGroupValues.isEmpty()) {
+
+				for (int j = 0; j < complianceGroupValues.size(); j++) {
+
+					// There is only 1 column in a CategoryColumnContainer so just get the first and only one.
+					String column = complianceGroupToUpdate.get(i).getColumnNames().get(0);
+
+					
+					// Get the category and the category's unique_name
+					String category = complianceGroupValues.get(j);
+					String unique_name = getCategoryUniqueName(category);
+					String currentCategories = getPreviousCategories(column);
+
+					String uri = URL + "/api/v1/attributes";
+
+					HttpPost httpPostRequest = new HttpPost(uri);
+					httpPostRequest.setHeader("Authorization", TOKEN);
+					httpPostRequest.setHeader("Accept", "application/json");
+					httpPostRequest.setHeader("Content-type", "application/json");					
+
+					LoggerSingelton.getInstance().getLogger().info("postNewCategories. currCategory = " + complianceGroupValues);
+
+					LocalDateTime today = LocalDateTime.now();					
+
+					JSONArray jsonPostArray = new JSONArray("[{\"original_name\":" + column + ",\"glossary_id\":" + null + ",\"friendly_name\":" + column + ",\"description\":" + "\"Imported from Salesforce on - " + today + "\"" +
+							",\"isShow\":" + true + ",\"categories\":[{" + "\"display_name\":" + category + ",\"unique_name\":" + unique_name + "}" + currentCategories + "]" + ",\"type\":" + "\"idsor_attributes\"" + "}]");
+
+					
+					
+					LoggerSingelton.getInstance().getLogger().info("JsonObject when posting a new complianceGroup " + jsonPostArray.toString());
+
+					StringEntity params = new StringEntity(jsonPostArray.toString());
+					httpPostRequest.setEntity(params);
+
+					// Set CONNECTION_TIMEOUT secondes timeout for the http call
+					final RequestConfig timeoutParams = RequestConfig.custom().setConnectTimeout(CONNECTION_TIMEOUT).setSocketTimeout(CONNECTION_TIMEOUT).build();
+					httpPostRequest.setConfig(timeoutParams);			
+
+					// create a new client for each iteration
+					createClient();			
+					HttpResponse response = client.execute(httpPostRequest);
+					LoggerSingelton.getInstance().getLogger().info("updateCorrelationSetWithComplianceGroup. After client.execute(httpPostRequest). field: " + column + ", value: " + complianceGroupValues);
+
+					proccessHttpResponse(response, uri);
+				}
+			}
+		}	
+	}
+
+	
+	/**	 
+	 * A helper method to get the unique_name of a specific category
+	 * @param String unique_name, String currentComplianceGroup
+	 * @return void
+	 * Throws ResponseNotOKException if response is not OK
+	 * @throws IOException 
+	 * @throws SecurityException 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException 
+	 * @throws ParseException 
+	 * @throws ResponseNotOKException 	 
+	 */
+	private String getPreviousCategories(String column) throws SecurityException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, ParseException, ResponseNotOKException {
+		LoggerSingelton.getInstance().getLogger().info("Beginning of getCategory() {}");
+		
+		String uri = URL + "/api/v1/lineage/attributes";
+		
+		HttpGet getRequest = new HttpGet(uri);
+		getRequest.setHeader("Authorization", TOKEN);
+		getRequest.setHeader("Accept", "application/json");
+		getRequest.setHeader("Content-type", "application/json");
+
+		// Set CONNECTION_TIMEOUT secondes timeout for the http call
+		final RequestConfig timeoutParams = RequestConfig.custom().setConnectTimeout(CONNECTION_TIMEOUT).setSocketTimeout(CONNECTION_TIMEOUT).build();
+		getRequest.setConfig(timeoutParams);
+
+		createClient();
+		HttpResponse response = client.execute(getRequest);
+		proccessHttpResponse(response, uri);
+
+		String result = EntityUtils.toString(response.getEntity());
+
+		LoggerSingelton.getInstance().getLogger().info("result string for uri: " + uri + ":" + result);
+
+		String categoriesString = "";
+		
+		// Set the results into a JSONArray. An array is used because there may be more than one category 
+		JSONObject jo  = new JSONObject(result);
+		JSONArray data = jo.getJSONArray("data");
+		JSONObject jArray = data.getJSONObject(0);
+		JSONObject attributes = jArray.getJSONObject("attributes");
+		JSONArray idsor_attributes = attributes.getJSONArray("idsor_attributes");
+		for (int i = 0; i < idsor_attributes.length(); i++) {
+			String name = idsor_attributes.getJSONObject(i).getString("friendly_name");
+			if (name.equals(column)) {
+				JSONArray categories = idsor_attributes.getJSONObject(i).getJSONArray("categories");
+				/*
+				 * categoriesString = categoriesString + "{display_name: " +
+				 * categories.getJSONObject(0).getString("display_name") + ", unique_name: " +
+				 * categories.getJSONObject(0).getString("unique_name") + "}";
+				 */
+				for (int k = 0; k < categories.length(); k++) {
+					categoriesString = categoriesString + ",{display_name: " + 
+				categories.getJSONObject(k).getString("display_name") + ", unique_name: " +
+				categories.getJSONObject(k).getString("unique_name") + "}";
+							
+				}
+				break;
+			}
+			
+		}
+		return categoriesString;
+	}
+
+	/**	 
+	 * A helper method to get the unique_name of a specific category
+	 * @param String unique_name, String currentComplianceGroup
+	 * @return void
+	 * Throws ResponseNotOKException if response is not OK
+	 * @throws ResponseNotOKException 
+	 * @throws IOException 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws ClientProtocolException 
+	 * @throws KeyManagementException 
+	 * @throws SecurityException 	 
+	 */
+	private String getCategoryUniqueName(String category) throws KeyManagementException, ClientProtocolException, NoSuchAlgorithmException, KeyStoreException, IOException, ResponseNotOKException {
+
+		LoggerSingelton.getInstance().getLogger().info("Beginning of getCategoryUniqueName() {}");
+		String uri = URL + API + VERSION + DATA_CATEGORIES;
+
+		HttpGet getRequest = new HttpGet(uri);
+		getRequest.setHeader("Authorization", TOKEN);
+		getRequest.setHeader("Accept", "application/json");
+		getRequest.setHeader("Content-type", "application/json");
+
+		// Set CONNECTION_TIMEOUT secondes timeout for the http call
+		final RequestConfig timeoutParams = RequestConfig.custom().setConnectTimeout(CONNECTION_TIMEOUT).setSocketTimeout(CONNECTION_TIMEOUT).build();
+		getRequest.setConfig(timeoutParams);
+
+		createClient();
+		HttpResponse response = client.execute(getRequest);
+		proccessHttpResponse(response, uri);
+
+		String result = EntityUtils.toString(response.getEntity());
+
+		LoggerSingelton.getInstance().getLogger().info("result string for uri: " + uri + ":" + result);
+
+		// Set the results into a JSONArray. An array is used because there may be more than one category 
+		JSONArray categories  = new JSONArray(result);
+
+		for (int i = 0; i < categories.length(); i++) {
+			JSONObject currentJson = categories.getJSONObject(i);			
+			if (category.equals(currentJson.getString("name"))) {
+				JSONArray jArray = currentJson.getJSONArray("dc");
+				String uniqu_name = ((JSONObject) jArray.get(0)).getString("unique_name");
+				return uniqu_name;
+			}
+
+		}
+
+		return null;
+	}
+
+
 }

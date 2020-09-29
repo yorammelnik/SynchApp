@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -14,6 +16,7 @@ import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -22,6 +25,7 @@ import com.bigid.appinfra.appinfrastructure.DTO.ParamDetails;
 import com.sforce.ws.ConnectionException;
 
 import bigIdService.BigIdService;
+import bigIdService.CategoryColumnContainer;
 import bigIdService.ColumnToSynch;
 import salesforceMetadataService.SalesforceMetadataService;
 
@@ -90,16 +94,16 @@ public class BigIdSalesforceAppController {
 	 * @throws Exception 
 	 * 
 	 */
-	@SuppressWarnings("deprecation")
+	
 	public void setContextActionParams(@RequestBody ExecutionContext executionContext) throws SecurityException, IOException {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of setContextActionParams()");
 
 		String[] args = list2Array(executionContext.getActionParams());
 
 		LoggerSingelton.setLogLevel(args[0]);	
-		this.SYNCH_CATEGORY_TO_SALESFORCE = new Boolean(args[1]);
-		this.UPDATE_SF_TO_REFLECT_BIGID = new Boolean(args[2]);
-		this.BYPASS_SSL_CERTIFICATE = new Boolean(args[3]);	
+		this.SYNCH_CATEGORY_TO_SALESFORCE = Boolean.valueOf(args[1]);
+		this.UPDATE_SF_TO_REFLECT_BIGID = Boolean.valueOf(args[2]);
+		this.BYPASS_SSL_CERTIFICATE = Boolean.valueOf(args[3]);
 		this.BigId_url = executionContext.getBigidBaseUrl().substring (0, (executionContext.getBigidBaseUrl().length()-8));
 		this.BigId_Token = executionContext.getBigidToken();
 		// Username and password are for running the app from eclipse and therefore a connection to BigId should be established
@@ -174,8 +178,8 @@ public class BigIdSalesforceAppController {
 				LoggerSingelton.getInstance().getLogger().info("Trying to connect to BigId.");			
 				bigIdConnectionService.postConnect();
 				LoggerSingelton.getInstance().getLogger().info("After bigIdConnectionService.postConnect(). Conncetion to BigId succeded.");
-			}
-
+			}			
+			
 			// Retrieve BigId categories
 			BigIdCategoryValues = bigIdConnectionService.getCategories();
 			LoggerSingelton.getInstance().getLogger().info("BigId category values: " + BigIdCategoryValues.toString());
@@ -202,6 +206,10 @@ public class BigIdSalesforceAppController {
 			salesforceMetaConnectionService.deployAttributes(UPDATE_SF_TO_REFLECT_BIGID, bigIdColumnsToSynch);
 			LoggerSingelton.getInstance().getLogger().info("After salesforceMetaConnectionService.deployAttributes. UPDATE_SF_TO_REFLECT_BIGID flag is " + UPDATE_SF_TO_REFLECT_BIGID);	
 
+			// Get Salesforce complianceGroup values for fields chosen in correlation set if they exist
+			//getComplianceGrupeValuesForCorrelationSetFields();
+			LoggerSingelton.getInstance().getLogger().info("After bigIdConnectionService.getComplianceGrupeValuesForCorrelationSetFields().");
+
 		}		
 		// All exception are caught and written to log file and than a new exception is thrown to 
 		// indicate to BigId that the action did not complete correctly
@@ -214,6 +222,27 @@ public class BigIdSalesforceAppController {
 		}		
 	}
 
+	/**	 
+	 * A method that retrieves complianceGroup values from Salesforce for fields that are chosen in a correlation 
+	 * set  in BigId that the dataSource is "Salesforce"	 * 
+	 * @throws Exception 
+	 * 
+	 */
+	private void getComplianceGrupeValuesForCorrelationSetFields() throws Exception {
+		LoggerSingelton.getInstance().getLogger().info("Beginning of getComplianceGrupeValuesForCorrelationSetFields()");
+		
+		// Get columns from all the "Salesforce" correlation Sets
+		ArrayList<ColumnToSynch> columns = bigIdConnectionService.getColumnsFromCorrelationsets();		
+		
+		// Use SalesforceMetadataService (through RetrieveMetadata) to retrieve the specific fields with their complianceGroup value 
+		// from Salesforce
+		ArrayList<CategoryColumnContainer> complianceGroupToUpdate = salesforceMetaConnectionService.retrieveCorrelationSetColumnsFromSalesforce(columns);		
+		
+		// Iterate through the fields that were retrieved from Salesforce and set the complianceGroup values as 
+		// categories for the specific field in BigId
+		bigIdConnectionService.updateCorrelationSetWithComplianceGroup(complianceGroupToUpdate);
+		
+	}
 
 	/**	 
 	 * A method that reads the configuraton.xml and returns the data to be loaded to the controller
@@ -227,7 +256,7 @@ public class BigIdSalesforceAppController {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of loadConfiguration()");
 
 		// get the configuration.xml under resources
-		InputStream in = getClass().getResourceAsStream("/configuration.xml"); 		
+		InputStream in = getClass().getResourceAsStream("/configuration.xml"); 
 
 		FileManipulationService parser = new FileManipulationService();
 		LoginData configurationXml = parser.readConfig(in);
