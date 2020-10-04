@@ -3,6 +3,7 @@ package appController;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
@@ -20,9 +21,9 @@ public class LoggerSingelton {
 	// static variable single_instance of type LoggerSingelton 
 	private static LoggerSingelton logger_instance = null;
 	static FileHandler fHandler;
-	
+
 	private String logFileName = "BigIdSalesforceAppLogFile.log";
-	
+
 	private static String logFilePath = "";
 
 	private static final Logger logger = Logger.getLogger(BigIdSalesforceAppController.class.getName());
@@ -31,13 +32,24 @@ public class LoggerSingelton {
 	// Default level of logging is DEBUG
 	private LoggerSingelton() throws SecurityException, IOException { 
 		logger.setLevel(Level.FINE);
+
+		Path resourceDirectory = Paths.get("src","main","resources", logFileName);		 
+
+		logFilePath = resourceDirectory.toAbsolutePath().toString();
 		
-		Path resourceDirectory = Paths.get("src","main","resources", logFileName);		
-		String absolutePath = resourceDirectory.toFile().getAbsolutePath();
-		logFilePath = absolutePath;
-		fHandler = new FileHandler(absolutePath);
+		// Create (if they don't exist) the path to the resources directory where the log file and the 
+		// Salesforce zip files reside.
+		if (! Files.exists(resourceDirectory.toAbsolutePath())) {
+			Files.createDirectories(resourceDirectory.getParent());
+			Files.createFile(resourceDirectory.toAbsolutePath());
+		}
+
+		fHandler = new FileHandler(logFilePath);
+
 		logger.addHandler(fHandler);
+
 		SimpleFormatter formatter = new SimpleFormatter();
+
 		fHandler.setFormatter(formatter);
 	} 
 
@@ -66,12 +78,12 @@ public class LoggerSingelton {
 	public static void closeHandler() {
 		fHandler.close();
 	}
-	
+
 	public Logger getLogger() {
 		return logger;
 	}
-	
-	
+
+
 
 	// Set Log level for the app
 	public static void setLogLevel(String logLevel) {
