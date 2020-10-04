@@ -58,6 +58,7 @@ public class ColumnToSynch {
 		this.categories.add(newCategory);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public void addCategoriesNoDuplicates(ArrayList<String> newCategories) {
 		for (Iterator iterator = newCategories.iterator(); iterator.hasNext();) {
 			String currCategory = (String) iterator.next();
@@ -68,6 +69,7 @@ public class ColumnToSynch {
 		}
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public void addAttributesNoDuplicates(ArrayList<String> newAttributes) {
 		for (Iterator iterator = newAttributes.iterator(); iterator.hasNext();) {
 			String currCategory = (String) iterator.next();

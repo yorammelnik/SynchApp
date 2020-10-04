@@ -63,7 +63,7 @@ public class SalesforceMetadataService {
 		LoggerSingelton.getInstance().getLogger().fine("Beginning of connect() {}");
 		metadataConnection = MetadataLoginUtil.login( url,  userName,  password,  token);	
 
-		// TODO If the connection fails an exception will porpagate all the way back to main method
+		// If the connection fails an exception will porpagate all the way back to main method
 	}
 	
 	/**	 
@@ -76,7 +76,7 @@ public class SalesforceMetadataService {
 
 		MetadataValuesContainer valuesContainer = getMedatadataValue(TYPE, COMPLIANCE_GROUP);
 
-		// TODO If the getMedatadataValue fails an exception will porpagate all the way back to main method
+		//  If the getMedatadataValue fails an exception will porpagate all the way back to main method
 
 		return valuesContainer.getMetaDataValues();		
 	}
@@ -95,7 +95,7 @@ public class SalesforceMetadataService {
 		// Read data
 		ReadResult readResult = metadataConnection.readMetadata(type, new String[] {typeName});
 
-		// TODO If the readMetaData fails an exception will porpagate all the way back to main method
+		//  If the readMetaData fails an exception will porpagate all the way back to main method
 
 		Metadata[] mdInfo = readResult.getRecords();
 
@@ -124,8 +124,6 @@ public class SalesforceMetadataService {
 	 */ 
 	public void addNewMetadataValue(ArrayList<String> newCategories) throws ConnectionException, SecurityException, IOException  {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of addNewMetadataValue()");
-
-		int numberOfNewCategories = newCategories.size();
 
 		// Get current compliance group values from Salesforce and add them to the new items - metadata api requirement.
 		// Inserting only new items to the metada will disactive the old values. Therefore we insert all of them again
@@ -156,10 +154,11 @@ public class SalesforceMetadataService {
 
 		}
 
+		@SuppressWarnings("unused")
 		UpsertResult[] results = metadataConnection.upsertMetadata(new Metadata[] { newSet });
 		LoggerSingelton.getInstance().getLogger().info("Inserting {} new metadata complianceGroup values to Salesforce");
 
-		// TODO If the updateMetadata fails an exception will porpagate all the way back to main method		
+		//  If the updateMetadata fails an exception will porpagate all the way back to main method		
 	}
 
 	/**	 
@@ -188,11 +187,13 @@ public class SalesforceMetadataService {
 	private String updateRetrievedData(Boolean OVERWRITE_SF, String retrievedZipFilePath, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws URISyntaxException, XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException, ZipException {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of updateRetrievedData()");
 		
+		// TODO delete all the comments and irrelavnt code
+		
 		Path path = Paths.get(FileManipulationService.getResourceDirectory() + UNZIPPED_DIRECTORY);
 		String unzippedDirectory = FileManipulationService.extractZipFile(retrievedZipFilePath, path.toString() );
 		//String unzippedDirectory = FileManipulationService.extractZipFile(retrievedZipFilePath, new File(  retrievedZipFilePath).getParent() +  UNZIPPED_DIRECTORY );
 		
-		String zipFileParentDirectory = new File(unzippedDirectory).getParent();
+		//String zipFileParentDirectory = new File(unzippedDirectory).getParent();
 		
 		FileManipulationService.addComplianceGroupToZipFile(OVERWRITE_SF, unzippedDirectory, bigIdColumnsToSynch);
 		

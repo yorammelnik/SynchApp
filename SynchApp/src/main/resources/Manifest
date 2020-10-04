@@ -37,7 +37,7 @@
 			"param_type": "String" ,
 			"is_cleartext": true ,
 			"param_description": "A flag for deciding if the update from BigId will overwrite or append categories to Saleforce complianceGroup filelds." ,
-			"default_value": "true" ,
+			"default_value": "false" ,
 			"param_priority": "primary" ,
 			"is_mandatory": true
 			},
@@ -83,6 +83,15 @@
 			"is_cleartext": false ,
 			"param_description": "Salesforce token retrieved from Admin pages in Salesforce" ,
 			"default_value": "lg9uKgktCDpPtglUSo3cV0oE" ,
+			"param_priority": "primary" ,
+			"is_mandatory": true
+			},
+			{
+			"param_name": "SYNCH_COMPLIANCE_GROUP_FROM_SALESFORCE" ,
+			"param_type": "String" ,
+			"is_cleartext": true ,
+			"param_description": "A flag to decide if complianceGroup added manually in Salesforce should be synched to correlationSet fields in BigId." ,
+			"default_value": "false" ,
 			"param_priority": "primary" ,
 			"is_mandatory": true
 			}

@@ -3,17 +3,14 @@ package salesforceMetadataService;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
@@ -21,17 +18,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import com.sforce.soap.enterprise.EnterpriseConnection;
-import com.sforce.soap.enterprise.LoginResult;
 import com.sforce.soap.metadata.AsyncResult;
 import com.sforce.soap.metadata.MetadataConnection;
 import com.sforce.soap.metadata.PackageTypeMembers;
@@ -40,7 +26,6 @@ import com.sforce.soap.metadata.RetrieveRequest;
 import com.sforce.soap.metadata.RetrieveResult;
 import com.sforce.soap.metadata.RetrieveStatus;
 import com.sforce.ws.ConnectionException;
-import com.sforce.ws.ConnectorConfig;
 
 import appController.FileManipulationService;
 import appController.LoggerSingelton;
@@ -63,9 +48,6 @@ public class RetrieveMetadata {
 	private static final long ONE_SECOND = 1000;
 	// maximum number of attempts to retrieve the results
 	private static final int MAX_NUM_POLL_REQUESTS = 50; 
-
-	// manifest file that controls which components get retrieved
-	private static final String MANIFEST_FILE = "D:\\BigId\\eclipse-workspace\\BigId2SalesforceApp\\package.xml"; 
 
 	private static final Double API_VERSION = 47.0; 
 	private static final String API_VERSION_STRING = "47.0";
@@ -156,6 +138,7 @@ public class RetrieveMetadata {
 	/**
 	 * Set the data to be sent to Salesforce from bigIdColumnsToSynch list.
 	 */
+	@SuppressWarnings("rawtypes")
 	private void setUnpackaged(RetrieveRequest request, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws SecurityException, IOException {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of setUnpackaged()");		
 

@@ -54,8 +54,8 @@ import net.lingala.zip4j.model.enums.EncryptionMethod;
 
 public class FileManipulationService {
 
-	private final String UPDATE_SF_TO_REFLECT_BIGID = "UPDATE_SF_TO_REFLECT_BIGID";
-	private final String USE_SSL_CERTIFICATE = "USE_SSL_CERTIFICATE";
+	private final String OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID = "OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID";
+	private final String BYPASS_SSL_CERTIFICATE = "BYPASS_SSL_CERTIFICATE";
 	private final String BigId_url = "BigId_url";	
 	private final String BigId_userName = "BigId_userName";	
 	private final String BigId_password = "BigId_password";
@@ -97,13 +97,13 @@ public class FileManipulationService {
 				String elementName = startElement.getName().getLocalPart();
 
 				switch (elementName) {
-				case UPDATE_SF_TO_REFLECT_BIGID:
+				case OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID:
 					event = eventReader.nextEvent();						
-					item.setUPDATE_SF_TO_REFLECT_BIGID(Boolean.valueOf(event.asCharacters().toString()));
+					item.setOVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID(Boolean.valueOf(event.asCharacters().toString()));
 					break;
-				case USE_SSL_CERTIFICATE:
+				case BYPASS_SSL_CERTIFICATE:
 					event = eventReader.nextEvent();						
-					item.setUSE_SSL_CERTIFICATE(Boolean.valueOf(event.asCharacters().toString()));
+					item.setBYPASS_SSL_CERTIFICATE(Boolean.valueOf(event.asCharacters().toString()));
 					break;
 				case BigId_url:
 					event = eventReader.nextEvent();						
@@ -286,6 +286,7 @@ public class FileManipulationService {
 	 * @param newAttributes
 	 * @return void
 	 */
+	@SuppressWarnings("rawtypes")
 	public static void addComplianceGroupToZipFile(Boolean OVERWRITE_COMPLIANCE_TAGS, String baseDirectory, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws XMLStreamException, ParserConfigurationException, SAXException, IOException, TransformerException {
 		LoggerSingelton.getInstance().getLogger().info("Start of addComplianceGroupToZip()");
 
@@ -350,8 +351,10 @@ public class FileManipulationService {
 					// add the new complianceGroup tags from newAttributes												
 					ArrayList<String> categories = findCategoriesForField( directoryToZip ,file, fullName, bigIdColumnsToSynch);
 					// remove all to be sure there are no duplicates and after that add them
-					categories.removeAll(listForHoldingComplianceValues);
-					categories.addAll(listForHoldingComplianceValues);
+					if (categories != null) {
+						categories.removeAll(listForHoldingComplianceValues);
+						categories.addAll(listForHoldingComplianceValues);
+					}
 					// empty listForHoldingComplianceValues list for the next 
 					listForHoldingComplianceValues = null;
 
@@ -390,7 +393,7 @@ public class FileManipulationService {
 	private static ArrayList<String> addComplianceGroupSeperately( String textContent) {
 
 		ArrayList<String> seperatedComplianceValues = new ArrayList<String>();
-		
+
 		if (! (textContent == null) ) {
 			int index = 0;
 			for (int i = 0; i < textContent.length(); i++) {				
@@ -479,6 +482,7 @@ public class FileManipulationService {
 	 * @throws IOException 
 	 * 
 	 */
+	@SuppressWarnings("rawtypes")
 	private static ArrayList<String> findCategoriesForField(File baseDirectoy, String file, String field, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws IOException{
 		LoggerSingelton.getInstance().getLogger().info("Beginning of findCategoriesForField");
 		for (Iterator iterator = bigIdColumnsToSynch.iterator(); iterator.hasNext();) {
@@ -585,7 +589,7 @@ public class FileManipulationService {
 
 		return columnsAndComplianceGroups;
 	}
-	
+
 	// Get resource directory from everywhere in the project
 	public static String getResourceDirectory() {
 		Path resourceDirectory = Paths.get("src","main","resources");		

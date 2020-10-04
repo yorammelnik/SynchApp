@@ -9,8 +9,8 @@ package appController;
  */
 public class LoginData {
 	
-	private Boolean UPDATE_SF_TO_REFLECT_BIGID;
-	private Boolean USE_SSL_CERTIFICATE;
+	private Boolean OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID;
+	private Boolean BYPASS_SSL_CERTIFICATE;
 	private String BigId_url;	
 	private String BigId_userName;	
 	private String BigId_password;
@@ -85,25 +85,25 @@ public class LoginData {
 	/**
 	 * @return the uSE_SSL_CERTIFICATE
 	 */
-	public Boolean getUSE_SSL_CERTIFICATE() {
-		return USE_SSL_CERTIFICATE;
+	public Boolean getBYPASS_SSL_CERTIFICATE() {
+		return BYPASS_SSL_CERTIFICATE;
 	}
 	/**
 	 * @param uSE_SSL_CERTIFICATE the uSE_SSL_CERTIFICATE to set
 	 */
-	public void setUSE_SSL_CERTIFICATE(Boolean uSE_SSL_CERTIFICATE) {
-		USE_SSL_CERTIFICATE = uSE_SSL_CERTIFICATE;
+	public void setBYPASS_SSL_CERTIFICATE(Boolean BYPASS_SSL_CERTIFICATE) {
+		this.BYPASS_SSL_CERTIFICATE = BYPASS_SSL_CERTIFICATE;
 	}
 	/**
 	 * @return the uPDATE_SF_TO_REFLECT_BIGID
 	 */
 	public Boolean getUPDATE_SF_TO_REFLECT_BIGID() {
-		return UPDATE_SF_TO_REFLECT_BIGID;
+		return OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID;
 	}
 	/**
 	 * @param uPDATE_SF_TO_REFLECT_BIGID the uPDATE_SF_TO_REFLECT_BIGID to set
 	 */
-	public void setUPDATE_SF_TO_REFLECT_BIGID(Boolean uPDATE_SF_TO_REFLECT_BIGID) {
-		UPDATE_SF_TO_REFLECT_BIGID = uPDATE_SF_TO_REFLECT_BIGID;
+	public void setOVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID(Boolean OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID) {
+		this.OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID = OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID;
 	}	
 }

@@ -26,8 +26,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.google.gson.JsonArray;
-
 import appController.LoggerSingelton;
 import appController.ResponseNotOKException;
 
@@ -36,7 +34,7 @@ import appController.ResponseNotOKException;
  * Description: Micro service for handling the connection and rest api calls to BigId
  * 
  */
-
+@SuppressWarnings("rawtypes")
 public class BigIdService {
 
 	private static String URL;
@@ -45,8 +43,7 @@ public class BigIdService {
 	private final static String SESSIONS = "/sessions";
 	private final static String DATA_CATEGORIES = "/data_categories";
 	private final static String ID_CONNECTIOS = "/id_connections";
-	private static final String ATTRIBUTES = "/attributes";
-	private static final String FORMAT_JSON = "/?format=json";
+
 
 	private static final int CONNECTION_TIMEOUT = 3000;
 
@@ -82,6 +79,7 @@ public class BigIdService {
 
 	/**
 	 * A method for creating an httpClient.
+	 * 
 	 * Use sslcontext library to deal with BigId instance in Development without SSL certificate
 	 * use this only when there isn't a certificate in the BigId environment.
 	 * @throws IOException 
@@ -114,6 +112,7 @@ public class BigIdService {
 
 	/**	 
 	 * A method that initiated the first connection to BigId and stores the seession auth_tokn in TOKEN data member
+	 * 
 	 * @param: A list of the categories that need to be added to BigId
 	 * @return - A list of the categories in BigId
 	 * @throws KeyStoreException 
@@ -154,6 +153,7 @@ public class BigIdService {
 
 	/**	 
 	 * Get all the categories from BigId
+	 * 
 	 * @param: A list of the categories that need to be added to Salesforce
 	 * @return - A list of the categories in BigId
 	 * @throws KeyStoreException 
@@ -199,6 +199,7 @@ public class BigIdService {
 
 	/**	 
 	 * Add new categories into BigId
+	 * 
 	 * @param: A list of the categories that need to be added to BigId
 	 * @return
 	 * @throws KeyStoreException 
@@ -246,14 +247,17 @@ public class BigIdService {
 		}		
 	}
 
-	/**	 
+	/**	A method that returns a list containing all the columns to synch to Salesforce.
+	 *  Each columnsToSynch may have attributes and the attributes may have categories.
+	 *  
 	 * @param 
-	 * @return
+	 * @return ArrayList<ColumnToSynch> columnsToSynch
 	 * @throws KeyStoreException 
 	 * @throws NoSuchAlgorithmException 
 	 * @throws KeyManagementException 
 	 * 
 	 */
+
 	public ArrayList<ColumnToSynch> getObjectsToSynch() throws ClientProtocolException, IOException, ResponseNotOKException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of getObjectsToSynch");
 
@@ -271,12 +275,6 @@ public class BigIdService {
 			JSONObject objectToSynch = (JSONObject) iterator.next();
 			String currObject = objectToSynch.getString("fullyQualifiedName");
 			LoggerSingelton.getInstance().getLogger().info("getObjectsToSynch, Current object is: " + currObject);
-
-			/* TODO - for debug purposes - work with one table only
-			if (  ! currObject.equals("Salesforce.Account")  ) {
-				continue;
-			}
-			 */
 
 			// set a query to retrieve the columns of the current object
 			String uri = URL + API + VERSION +"/data-catalog/object-details/columns?object_name=" + currObject;
@@ -338,8 +336,13 @@ public class BigIdService {
 	}
 
 	/**	 
-	 * @param 
-	 * @return
+	 * Salesforce has complex fields that are split into a few sub fields. Address is split to City, Country, PostalCode, State, Street, etc.... 
+	 * Name in Salesforce is also comple and splitted to FirstName and LastName.
+	 * In BigId we use the splitted fields but when sending the data to Salesforce we need to combine them into the complex field. We
+	 * gather all the categories from the sub fields and append them to the complex field.
+	 * 
+	 * @param ArrayList<ColumnToSynch> columnsToSynch
+	 * @return void
 	 * @throws IOException 
 	 * @throws SecurityException 
 	 *  City, Country, PostalCode, State, Street --> Address
@@ -365,7 +368,6 @@ public class BigIdService {
 			if (columnToSynch.getColumnName().equals("FirstName")) {
 				nameColumnsToDealWith.add(columnToSynch);
 			}
-
 		}
 
 		// Deal with Address fields
@@ -374,8 +376,7 @@ public class BigIdService {
 
 			String columnName = columnToDeal.getColumnName();
 			String addressPrefix = columnName.substring(0, columnName.length() - 4);
-			columnToDeal.setColumnName(addressPrefix + "Address");
-			String table = columnToDeal.getTableFullyQualifiedName();
+			columnToDeal.setColumnName(addressPrefix + "Address");			
 
 			for (Iterator iterator2 = columnsToSynch.iterator(); iterator2.hasNext();) {
 				ColumnToSynch columnToSynch = (ColumnToSynch) iterator2.next();
@@ -396,8 +397,7 @@ public class BigIdService {
 			ColumnToSynch nameColumnToDeal = (ColumnToSynch) iterator1.next();
 
 			String columnName1 = nameColumnToDeal.getColumnName().substring (5, nameColumnToDeal.getColumnName().length() );
-			nameColumnToDeal.setColumnName(columnName1);
-			String table1 = nameColumnToDeal.getTableFullyQualifiedName();
+			nameColumnToDeal.setColumnName(columnName1);			
 
 			for (Iterator iterator2 = columnsToSynch.iterator(); iterator2.hasNext();) {
 				ColumnToSynch columnToSynch = (ColumnToSynch) iterator2.next();
@@ -416,8 +416,10 @@ public class BigIdService {
 	}
 
 	/**	 
-	 * @param 
-	 * @return
+	 * A method called from getObjectsToSynch() and returns the categories of the specific column parameter.
+	 * 
+	 * @param String currObject, ArrayList categoryAndColumnList, String column
+	 * @return ArrayList<String> categoriesFound
 	 * @throws IOException 
 	 * @throws SecurityException 
 	 * 
@@ -442,8 +444,11 @@ public class BigIdService {
 	}
 
 	/**	 
-	 * @param 
-	 * @return
+	 * A method called from getObjectsToSynch() and returns A list of all the categories and columns that have 
+	 * a certain attribute from all the Salesforce object in BigId 
+	 * 
+	 * @param  ArrayList<JSONObject> salesforceRelatedObjects
+	 * @return ArrayList<CategoryColumnContainer> categoriesAndColumsFound
 	 * @throws KeyStoreException 
 	 * @throws NoSuchAlgorithmException 
 	 * @throws KeyManagementException 
@@ -511,6 +516,9 @@ public class BigIdService {
 	}
 
 	/**	 
+	 * A method that is called from getCategoriesAndColumns() and checks if their is a duplicate in categoriesAndColumsFound list
+	 * for the currCC parameter because we do not want duplicate items in the list.
+	 * 
 	 * @param 
 	 * @return
 	 * @throws IOException 
@@ -531,8 +539,9 @@ public class BigIdService {
 	}
 
 	/**	 
-	 * @param 
-	 * @return
+	 * A method that retrieves all the Salesforce related objects from BigId database.
+	 * 
+	 * @return ArrayList<JSONObject> salesforceObjects
 	 * @throws KeyStoreException 
 	 * @throws NoSuchAlgorithmException 
 	 * @throws KeyManagementException 
@@ -566,7 +575,6 @@ public class BigIdService {
 		JSONArray jArray = jo.getJSONArray("results");
 
 		//Iterate through the JSONAraay and extract all the categories into a categoryList
-		// TODO - make sure that I am adding to the list only objects that have PI - personal information
 		JSONObject currentJson;
 		for (int j = 0; j < jArray.length(); j++) {
 			currentJson = jArray.getJSONObject(j);
@@ -582,6 +590,7 @@ public class BigIdService {
 
 	/**	 
 	 * A method that processes an http response and throws an exception if the response is not OK
+	 * 
 	 * @param HttpResponse response, String uri
 	 * @return void
 	 * 
@@ -600,6 +609,7 @@ public class BigIdService {
 
 	/**	 
 	 * Get all the relevant columns from the relevan correlationSets 
+	 * 
 	 * @throws KeyStoreException 
 	 * @throws NoSuchAlgorithmException 
 	 * @throws KeyManagementException 
@@ -660,15 +670,67 @@ public class BigIdService {
 				}
 			}						
 		}
+
+		// Convert primitive fields into their complex types because the retrieval from Salesforce is from the Complex field
+		// The method updates columnsToRetrieve list that is sent as a parameter.
+		convertPrimitve2Complex(columnsToRetrieve);
 		return columnsToRetrieve;
 	}
 
+
+	/**	 
+	 * Convert primitive fields into their complex types because the retrieval from Salesforce is from the Complex field
+	 * The method updates columnsToRetrieve list that is sent as a parameter.
+	 * 
+	 * @param ArrayList<CategoryColumnContainer> columnsToRetrieve
+	 * @return void	 * 
+	 * @throws SecurityException 	 * 
+	 * @throws IOException 
+	 *  City, Country, PostalCode, State, Street --> Address
+	 *  FirstName, LastName --> Name
+	 */
+	private void convertPrimitve2Complex(ArrayList<ColumnToSynch> columnsToRetrieve) throws SecurityException, IOException {
+		LoggerSingelton.getInstance().getLogger().info("Beginning of BigIdService.convertPrimitve2Complex()");
+
+		ArrayList<ColumnToSynch> columnsToDelete = new ArrayList<ColumnToSynch>();
+		
+		// Loop through the list and find the columns that are primitive
+		for (int i = 0; i < columnsToRetrieve.size(); i++) {
+			
+			
+		}
+
+	}
+
+
+	/**	 
+	 * A method that converts a Salesforce complexField into its subfields becasue they are the fields that 
+	 * BigId refers to
+	 * 
+	 * @param String column
+	 * @return void
+	 * @throws SecurityException 	 
+	 * @throws IOException 
+	 *  City, Country, PostalCode, State, Street --> Address
+	 *  FirstName, LastName --> Name
+	 */
+	private ArrayList<String> convertComplexField2Primitive(String column) throws SecurityException, IOException {
+		LoggerSingelton.getInstance().getLogger().info("Beginning of BigIdService.convertComplexField2Primitive()");
+
+		return null;
+
+
+	}
+
+
+
+
 	/**	 
 	 * A method that updates the correlation page with new complianceGroup values retrieved from Salesforce
+	 * 
 	 * @param ArrayList<CategoryColumnContainer> complianceGroupToUpdate
 	 * @return void
 	 * 
-	 * Throws ResponseNotOKException if response is not OK
 	 * @throws IOException 
 	 * @throws SecurityException 
 	 * @throws KeyStoreException 
@@ -693,11 +755,15 @@ public class BigIdService {
 					// There is only 1 column in a CategoryColumnContainer so just get the first and only one.
 					String column = complianceGroupToUpdate.get(i).getColumnNames().get(0);
 
-					
+					// Deal with Salesforce complex fields: Address and Name
+					if (  column.contains("Address") || column.contains("Name") ) {
+						convertComplexField2Primitive(column);
+					}
+
 					// Get the category and the category's unique_name
 					String category = complianceGroupValues.get(j);
-					String unique_name = getCategoryUniqueName(category);
-					String currentCategories = getPreviousCategories(column);
+					String _id = getCategory_id(category);
+					String previousCategories = getPreviousCategories(column);
 
 					String uri = URL + "/api/v1/attributes";
 
@@ -711,10 +777,8 @@ public class BigIdService {
 					LocalDateTime today = LocalDateTime.now();					
 
 					JSONArray jsonPostArray = new JSONArray("[{\"original_name\":" + column + ",\"glossary_id\":" + null + ",\"friendly_name\":" + column + ",\"description\":" + "\"Imported from Salesforce on - " + today + "\"" +
-							",\"isShow\":" + true + ",\"categories\":[{" + "\"display_name\":" + category + ",\"unique_name\":" + unique_name + "}" + currentCategories + "]" + ",\"type\":" + "\"idsor_attributes\"" + "}]");
+							",\"isShow\":" + true + ",\"categories\":[{" + "\"display_name\":" + category + ",\"unique_name\":" + _id + "}" + previousCategories + "]" + ",\"type\":" + "\"idsor_attributes\"" + "}]");
 
-					
-					
 					LoggerSingelton.getInstance().getLogger().info("JsonObject when posting a new complianceGroup " + jsonPostArray.toString());
 
 					StringEntity params = new StringEntity(jsonPostArray.toString());
@@ -735,12 +799,12 @@ public class BigIdService {
 		}	
 	}
 
-	
+
 	/**	 
 	 * A helper method to get the unique_name of a specific category
+	 * 
 	 * @param String unique_name, String currentComplianceGroup
 	 * @return void
-	 * Throws ResponseNotOKException if response is not OK
 	 * @throws IOException 
 	 * @throws SecurityException 
 	 * @throws KeyStoreException 
@@ -750,10 +814,10 @@ public class BigIdService {
 	 * @throws ResponseNotOKException 	 
 	 */
 	private String getPreviousCategories(String column) throws SecurityException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, ParseException, ResponseNotOKException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of getCategory() {}");
-		
+		LoggerSingelton.getInstance().getLogger().info("Beginning of getCategory()");
+
 		String uri = URL + "/api/v1/lineage/attributes";
-		
+
 		HttpGet getRequest = new HttpGet(uri);
 		getRequest.setHeader("Authorization", TOKEN);
 		getRequest.setHeader("Accept", "application/json");
@@ -769,43 +833,49 @@ public class BigIdService {
 
 		String result = EntityUtils.toString(response.getEntity());
 
-		LoggerSingelton.getInstance().getLogger().info("result string for uri: " + uri + ":" + result);
+		//LoggerSingelton.getInstance().getLogger().info("result string for uri: " + uri + ":" + result);
 
 		String categoriesString = "";
-		
-		// Set the results into a JSONArray. An array is used because there may be more than one category 
-		JSONObject jo  = new JSONObject(result);
-		JSONArray data = jo.getJSONArray("data");
-		JSONObject jArray = data.getJSONObject(0);
-		JSONObject attributes = jArray.getJSONObject("attributes");
+
+		// Go down the Jsonobject hierarchy until reaching the list of attributes and their categories.
+		JSONObject Jresult  = new JSONObject(result);
+		JSONArray data = Jresult.getJSONArray("data");
+		JSONObject jArrayData = data.getJSONObject(0);
+		JSONObject attributes = jArrayData.getJSONObject("attributes");
 		JSONArray idsor_attributes = attributes.getJSONArray("idsor_attributes");
 		for (int i = 0; i < idsor_attributes.length(); i++) {
-			String name = idsor_attributes.getJSONObject(i).getString("friendly_name");
-			if (name.equals(column)) {
-				JSONArray categories = idsor_attributes.getJSONObject(i).getJSONArray("categories");
-				/*
-				 * categoriesString = categoriesString + "{display_name: " +
-				 * categories.getJSONObject(0).getString("display_name") + ", unique_name: " +
-				 * categories.getJSONObject(0).getString("unique_name") + "}";
-				 */
-				for (int k = 0; k < categories.length(); k++) {
-					categoriesString = categoriesString + ",{display_name: " + 
-				categories.getJSONObject(k).getString("display_name") + ", unique_name: " +
-				categories.getJSONObject(k).getString("unique_name") + "}";
-							
+			String friendly_name = idsor_attributes.getJSONObject(i).getString("friendly_name");
+			if (friendly_name.equals(column)) {
+
+				// There could be attributes that do not have a category or categories
+				if (! idsor_attributes.getJSONObject(i).isNull("categories")) {
+					JSONArray categories = idsor_attributes.getJSONObject(i).getJSONArray("categories");
+
+					for (int k = 0; k < categories.length(); k++) {
+
+						// TODO temporary fix for dealing with garbage categories that are not displayed. 
+						// Only if there is a display_name than copy them to categoriesString
+
+						if (! categories.getJSONObject(k).isNull("display_name") ) {
+							categoriesString = categoriesString + ",{display_name: " + 
+									categories.getJSONObject(k).getString("display_name") + ", _id: " +
+									categories.getJSONObject(k).getString("_id") + "}";
+						}
+					}
+					break;
+
 				}
-				break;
 			}
-			
+
 		}
 		return categoriesString;
 	}
 
 	/**	 
 	 * A helper method to get the unique_name of a specific category
+	 * 
 	 * @param String unique_name, String currentComplianceGroup
 	 * @return void
-	 * Throws ResponseNotOKException if response is not OK
 	 * @throws ResponseNotOKException 
 	 * @throws IOException 
 	 * @throws KeyStoreException 
@@ -814,9 +884,9 @@ public class BigIdService {
 	 * @throws KeyManagementException 
 	 * @throws SecurityException 	 
 	 */
-	private String getCategoryUniqueName(String category) throws KeyManagementException, ClientProtocolException, NoSuchAlgorithmException, KeyStoreException, IOException, ResponseNotOKException {
+	private String getCategory_id(String category) throws KeyManagementException, ClientProtocolException, NoSuchAlgorithmException, KeyStoreException, IOException, ResponseNotOKException {
 
-		LoggerSingelton.getInstance().getLogger().info("Beginning of getCategoryUniqueName() {}");
+		LoggerSingelton.getInstance().getLogger().info("Beginning of getCategoryUniqueName()");
 		String uri = URL + API + VERSION + DATA_CATEGORIES;
 
 		HttpGet getRequest = new HttpGet(uri);
@@ -834,7 +904,7 @@ public class BigIdService {
 
 		String result = EntityUtils.toString(response.getEntity());
 
-		LoggerSingelton.getInstance().getLogger().info("result string for uri: " + uri + ":" + result);
+		//LoggerSingelton.getInstance().getLogger().info("result string for uri: " + uri + ":" + result);
 
 		// Set the results into a JSONArray. An array is used because there may be more than one category 
 		JSONArray categories  = new JSONArray(result);
@@ -843,12 +913,11 @@ public class BigIdService {
 			JSONObject currentJson = categories.getJSONObject(i);			
 			if (category.equals(currentJson.getString("name"))) {
 				JSONArray jArray = currentJson.getJSONArray("dc");
-				String uniqu_name = ((JSONObject) jArray.get(0)).getString("unique_name");
+				String uniqu_name = ((JSONObject) jArray.get(0)).getString("_id");
 				return uniqu_name;
 			}
 
 		}
-
 		return null;
 	}
 

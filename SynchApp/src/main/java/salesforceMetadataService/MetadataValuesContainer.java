@@ -39,6 +39,7 @@ public class MetadataValuesContainer {
 		this.currentSet = currentSet;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public boolean itemExists(String newItem) {
 		for (Iterator iterator = metaDataValues.iterator(); iterator.hasNext();) {
 			String currItem = (String) iterator.next();

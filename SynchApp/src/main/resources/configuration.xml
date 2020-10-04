@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
 	<LoginData>
-		<UPDATE_SF_TO_REFLECT_BIGID>true</UPDATE_SF_TO_REFLECT_BIGID>
-		<USE_SSL_CERTIFICATE>true</USE_SSL_CERTIFICATE>
+		<OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID>false</OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID>
+		<BYPASS_SSL_CERTIFICATE>true</BYPASS_SSL_CERTIFICATE>
 		<BigId_url>https://yoram4.westeurope.cloudapp.azure.com</BigId_url>  <!-- https://sandbox.bigiddemo.com -->		
 		<BigId_userName>bigid</BigId_userName> <!-- yoram -->
 		<BigId_password>bigid111</BigId_password>	
@@ -10,6 +10,6 @@
 		<Salesforce_username>yorammelnik@gmail.com</Salesforce_username>
 		<Salesforce_password>Koper0520</Salesforce_password>
 		<Salesforce_token>lg9uKgktCDpPtglUSo3cV0oE</Salesforce_token>
-		<Synch_categories_to_Salesforce>true</Synch_categories_to_Salesforce>		
+		<Synch_categories_to_Salesforce>false</Synch_categories_to_Salesforce>		
 	</LoginData>
 </config>

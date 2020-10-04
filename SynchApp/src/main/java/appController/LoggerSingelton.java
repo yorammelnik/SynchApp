@@ -19,7 +19,11 @@ public class LoggerSingelton {
 
 	// static variable single_instance of type LoggerSingelton 
 	private static LoggerSingelton logger_instance = null;
-	FileHandler fHandler;
+	static FileHandler fHandler;
+	
+	private String logFileName = "BigIdSalesforceAppLogFile.log";
+	
+	private static String logFilePath = "";
 
 	private static final Logger logger = Logger.getLogger(BigIdSalesforceAppController.class.getName());
 
@@ -28,11 +32,10 @@ public class LoggerSingelton {
 	private LoggerSingelton() throws SecurityException, IOException { 
 		logger.setLevel(Level.FINE);
 		
-		Path resourceDirectory = Paths.get("src","main","resources", "BigIdSalesforceAppLogFile.log");		
+		Path resourceDirectory = Paths.get("src","main","resources", logFileName);		
 		String absolutePath = resourceDirectory.toFile().getAbsolutePath();
-		
+		logFilePath = absolutePath;
 		fHandler = new FileHandler(absolutePath);
-		//fHandler = new FileHandler("C:\\BigIdSynchAppLog\\synchAppLogFile.log");
 		logger.addHandler(fHandler);
 		SimpleFormatter formatter = new SimpleFormatter();
 		fHandler.setFormatter(formatter);
@@ -50,7 +53,7 @@ public class LoggerSingelton {
 	// Static method to get the log file as String
 	public static String getLogFile() throws FileNotFoundException {
 
-		File logFile = new File("C:\\BigIdSynchAppLog\\synchAppLogFile.log");
+		File logFile = new File(logFilePath);
 		Scanner myReader = new Scanner(logFile);
 		String data = new String();
 		while (myReader.hasNextLine()) {
@@ -60,10 +63,15 @@ public class LoggerSingelton {
 		return data;
 	}
 
-
+	public static void closeHandler() {
+		fHandler.close();
+	}
+	
 	public Logger getLogger() {
 		return logger;
 	}
+	
+	
 
 	// Set Log level for the app
 	public static void setLogLevel(String logLevel) {
