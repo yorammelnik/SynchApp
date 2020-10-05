@@ -117,14 +117,19 @@ public class RetrieveMetadata {
 			ByteArrayInputStream bais = new ByteArrayInputStream(result.getZipFile());				
 			
 			String path = FileManipulationService.getResourceDirectory();
-			Path resultFilePath = Paths.get(path, SalesforceMetadataService.getRetrieveResultFile());			
+			LoggerSingelton.getInstance().getLogger().info("Line 120. String path: " + path);
 			
-			FileOutputStream os = new FileOutputStream(resultFilePath.toFile());
+			Path resultFilePath = Paths.get(path, SalesforceMetadataService.getRetrieveResultFile());			
+			LoggerSingelton.getInstance().getLogger().info("Line 122. Path resultFilePath: " + resultFilePath.toAbsolutePath().toString());
+						
+			FileOutputStream os = new FileOutputStream(resultFilePath.toAbsolutePath().toString());
+			
 			try {
 				ReadableByteChannel src = Channels.newChannel(bais);
 				FileChannel dest = os.getChannel();
-				copy(src, dest);
-				LoggerSingelton.getInstance().getLogger().info("in retrieveZip(). Results written to " + resultFilePath.toFile().getAbsolutePath());
+				copy(src, dest);				
+				LoggerSingelton.getInstance().getLogger().info("in retrieveZip(). Results written to " + resultFilePath.toAbsolutePath().toString());
+				
 			} finally {
 				os.close();
 			}

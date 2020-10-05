@@ -187,25 +187,24 @@ public class SalesforceMetadataService {
 	private String updateRetrievedData(Boolean OVERWRITE_SF, String retrievedZipFilePath, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws URISyntaxException, XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException, ZipException {
 		LoggerSingelton.getInstance().getLogger().info("Beginning of updateRetrievedData()");
 		
-		// TODO delete all the comments and irrelavnt code
+		Path unzippedDirectoryPath = Paths.get(FileManipulationService.getResourceDirectory(), UNZIPPED_DIRECTORY);
 		
-		Path path = Paths.get(FileManipulationService.getResourceDirectory() + UNZIPPED_DIRECTORY);
-		String unzippedDirectory = FileManipulationService.extractZipFile(retrievedZipFilePath, path.toString() );
-		//String unzippedDirectory = FileManipulationService.extractZipFile(retrievedZipFilePath, new File(  retrievedZipFilePath).getParent() +  UNZIPPED_DIRECTORY );
+		LoggerSingelton.getInstance().getLogger().info("In updateRetrievedData(), Line 193, UNZIPPED_DIRECTORY: " +UNZIPPED_DIRECTORY);
+		LoggerSingelton.getInstance().getLogger().info("In updateRetrievedData(), Line 143, FileManipulationService.getResourceDirectory(): " + FileManipulationService.getResourceDirectory() );
+		LoggerSingelton.getInstance().getLogger().info("In updateRetrievedData(), Line 195, path: " + unzippedDirectoryPath.toAbsolutePath().toString());
+		LoggerSingelton.getInstance().getLogger().info("In updateRetrievedData(), Line 196, retrievedZipFilePath: " + retrievedZipFilePath);
 		
-		//String zipFileParentDirectory = new File(unzippedDirectory).getParent();
+		String unzippedDirectory = FileManipulationService.extractZipFile(retrievedZipFilePath, unzippedDirectoryPath.toString() );		
 		
 		FileManipulationService.addComplianceGroupToZipFile(OVERWRITE_SF, unzippedDirectory, bigIdColumnsToSynch);
 		
-		Path path2 = Paths.get(FileManipulationService.getResourceDirectory() + ZIP_TO_UPLOAD_FILE);
-		//String newZipFileToUpload = zipFileParentDirectory + ZIP_TO_UPLOAD_FILE;
+		Path zipToUploadPath = Paths.get(FileManipulationService.getResourceDirectory() , ZIP_TO_UPLOAD_FILE);
+				
+		Path directoryToZipPath = Paths.get(FileManipulationService.getResourceDirectory() , UNZIPPED_DIRECTORY, UNPACKAGED_DIRECTORY);
 		
+		FileManipulationService.zip(zipToUploadPath.toString(), directoryToZipPath.toString());	
 		
-		Path path3 = Paths.get(FileManipulationService.getResourceDirectory() , UNZIPPED_DIRECTORY, UNPACKAGED_DIRECTORY);
-		FileManipulationService.zip(path2.toString(), path3.toString());
-		//FileManipulationService.zip(newZipFileToUpload, unzippedDirectory + UNPACKAGED_DIRECTORY);		
-		
-		return path2.toString();		
+		return zipToUploadPath.toString();		
 
 	}
 	

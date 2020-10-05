@@ -153,7 +153,7 @@ public class FileManipulationService {
 	 *
 	 */
 	public static String extractZipFile(String zipFilePath, String outputDirectory) throws XMLStreamException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of readZipFile()");		
+		LoggerSingelton.getInstance().getLogger().info("Beginning of extractZipFile()");		
 
 		byte[] buffer = new byte[1024];
 
@@ -190,7 +190,7 @@ public class FileManipulationService {
 		zis.closeEntry();
 		zis.close();		
 
-		LoggerSingelton.getInstance().getLogger().info("In readZipFile(). zipFile: " + outputDirectory);
+		LoggerSingelton.getInstance().getLogger().info("In extractZipFile(). outputDirectory: " + outputDirectory);
 		return outputDirectory;
 	}
 
@@ -592,8 +592,8 @@ public class FileManipulationService {
 
 	// Get resource directory from everywhere in the project
 	public static String getResourceDirectory() {
-		Path resourceDirectory = Paths.get("src","main","resources");		
-		String absolutePath = resourceDirectory.toFile().getAbsolutePath() + "\\";
+		Path resourceDirectory = Paths.get("src","main","resources");	
+		String absolutePath = resourceDirectory.toAbsolutePath().toString();
 		return absolutePath;
 	}
 }
