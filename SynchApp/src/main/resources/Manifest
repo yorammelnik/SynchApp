@@ -19,7 +19,7 @@
 			"param_type": "String" ,
 			"is_cleartext": true ,
 			"param_description": "LogLevel for the synch application" ,
-			"default_value": "fine" ,
+			"default_value": "info" ,
 			"param_priority": "primary" ,
 			"is_mandatory": true
 			},
@@ -73,7 +73,7 @@
 			"param_type": "String" ,
 			"is_cleartext": false ,
 			"param_description": "Salesforce password" ,
-			"default_value": "Koper0520" ,
+			"default_value": "Yoya2021" ,
 			"param_priority": "primary" ,
 			"is_mandatory": true
 			},
@@ -82,7 +82,7 @@
 			"param_type": "String" ,
 			"is_cleartext": false ,
 			"param_description": "Salesforce token retrieved from Admin pages in Salesforce" ,
-			"default_value": "lg9uKgktCDpPtglUSo3cV0oE" ,
+			"default_value": "6BS8UStPYgI4NyhRPWcYQLJT" ,
 			"param_priority": "primary" ,
 			"is_mandatory": true
 			},
@@ -91,10 +91,20 @@
 			"param_type": "String" ,
 			"is_cleartext": true ,
 			"param_description": "A flag to decide if complianceGroup added manually in Salesforce should be synched to correlationSet fields in BigId." ,
-			"default_value": "false" ,
+			"default_value": "true" ,
+			"param_priority": "primary" ,
+			"is_mandatory": true
+			},
+			{
+			"param_name": "APPLY_BIGID_CATEGORIES_TO_SALESFORCE" ,
+			"param_type": "String" ,
+			"is_cleartext": true ,
+			"param_description": "A flag to decide if categories in BigId should be applied as complianceGroup values to fields in Salesforce." ,
+			"default_value": "true" ,
 			"param_priority": "primary" ,
 			"is_mandatory": true
 			}
+			
 		]
     }
   ]

@@ -26,8 +26,10 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import appController.LoggerSingelton;
+import SpringApp.Controllers.AppLogger;
+import appController.LoggerSingeltonnnnn;
 import appController.ResponseNotOKException;
+import ch.qos.logback.classic.net.LoggingEventPreSerializationTransformer;
 
 /*
  * @ Author: Yoram Melnik
@@ -68,7 +70,7 @@ public class BigIdService {
 	 * 
 	 */
 	public BigIdService(Boolean useSSLCertificate, String url, String userName, String password, String bigIdToken) throws SecurityException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of BigIdService()");
+		AppLogger.getLogger().fine("Beginning of BigIdService()");
 		// set fields from configuration.xml
 		URL = url;
 		USER_NAME = userName;
@@ -86,7 +88,7 @@ public class BigIdService {
 	 * @throws SecurityException 
 	 */
 	private HttpClient createClient() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of createClient())");
+		AppLogger.getLogger().fine("Beginning of createClient())");
 		if (USE_SSL_CERTIFICATE) {	
 			javax.net.ssl.SSLContext sslcontext = SSLContexts
 					.custom()
@@ -121,7 +123,7 @@ public class BigIdService {
 	 * 
 	 */
 	public void postConnect() throws ClientProtocolException, IOException, ResponseNotOKException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {				
-		LoggerSingelton.getInstance().getLogger().info("Beginning of postConnect()");
+		AppLogger.getLogger().info("Beginning of postConnect()");
 
 
 		// Set user name and password 
@@ -148,7 +150,7 @@ public class BigIdService {
 
 		// set TOKEN = auth_token from response
 		TOKEN = responseJObject.getString("auth_token");			
-		LoggerSingelton.getInstance().getLogger().info("postConnect(). Token received is " + TOKEN);
+		AppLogger.getLogger().fine("postConnect(). Token received is " + TOKEN);
 	}
 
 	/**	 
@@ -162,7 +164,7 @@ public class BigIdService {
 	 * 
 	 */
 	public ArrayList<String> getCategories() throws ClientProtocolException, IOException, ResponseNotOKException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of getCategories() {}");
+		AppLogger.getLogger().fine("Beginning of getCategories() {}");
 		String uri = URL + API + VERSION + DATA_CATEGORIES;
 
 		HttpGet getRequest = new HttpGet(uri);
@@ -182,7 +184,7 @@ public class BigIdService {
 
 		String result = EntityUtils.toString(response.getEntity());
 
-		LoggerSingelton.getInstance().getLogger().info("result string for uri: " + uri + ":" + result);
+		AppLogger.getLogger().fine("result string for uri: " + uri + ":" + result);
 
 		// Set the results into a JSONArray. An array is used because there may be more that on category 
 		JSONArray categories  = new JSONArray(result);
@@ -208,7 +210,7 @@ public class BigIdService {
 	 * 
 	 */
 	public void postNewCategories(ArrayList<String> newCategories) throws ClientProtocolException, IOException, ResponseNotOKException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {				
-		LoggerSingelton.getInstance().getLogger().info("Beginning of postNewCategories()");
+		AppLogger.getLogger().info("Beginning of postNewCategories()");
 
 		String uri = URL + API + VERSION + DATA_CATEGORIES;
 		JSONArray newCategoriesJsonArray = new JSONArray(newCategories);
@@ -222,7 +224,7 @@ public class BigIdService {
 			httpPostRequest.setHeader("Content-type", "application/json");
 
 			String currCategory = newCategoriesJsonArray.getString(i);
-			LoggerSingelton.getInstance().getLogger().info("postNewCategories. currCategory = " + currCategory);
+			AppLogger.getLogger().fine("postNewCategories. currCategory = " + currCategory);
 
 			LocalDateTime today = LocalDateTime.now();
 			JSONObject jsonPostObject = new JSONObject( "{\"unique_name\":" + "\"" + currCategory + "\"," + "\"description\":" + "\"Imported from Salesforce on - " + today +  "\"," + "\"display_name\":" + "\"" + currCategory + "\"," + "\"color\":" + "\""  + "\"}" );
@@ -236,13 +238,13 @@ public class BigIdService {
 
 			// create a new client for each iteration
 			createClient();
-			LoggerSingelton.getInstance().getLogger().info("postNewCategories. Before client.execute(httpPostRequest). " + currCategory);
+			AppLogger.getLogger().fine("postNewCategories. Before client.execute(httpPostRequest). " + currCategory);
 			HttpResponse response = client.execute(httpPostRequest);
-			LoggerSingelton.getInstance().getLogger().info("postNewCategories. After client.execute(httpPostRequest). " + currCategory);
+			AppLogger.getLogger().fine("postNewCategories. After client.execute(httpPostRequest). " + currCategory);
 
 			proccessHttpResponse(response, uri);			
 
-			LoggerSingelton.getInstance().getLogger().info("JsonObject when posting a new category " + jsonPostObject.toString());
+			AppLogger.getLogger().fine("JsonObject when posting a new category " + jsonPostObject.toString());
 
 		}		
 	}
@@ -259,7 +261,7 @@ public class BigIdService {
 	 */
 
 	public ArrayList<ColumnToSynch> getObjectsToSynch() throws ClientProtocolException, IOException, ResponseNotOKException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of getObjectsToSynch");
+		AppLogger.getLogger().info("Beginning of getObjectsToSynch");
 
 		// get all the "Objects" from bigId that were retrieved from Salesforce
 		ArrayList<JSONObject> salesforceRelatedObjects = getSalesforceObjectsFromDb();
@@ -274,11 +276,11 @@ public class BigIdService {
 
 			JSONObject objectToSynch = (JSONObject) iterator.next();
 			String currObject = objectToSynch.getString("fullyQualifiedName");
-			LoggerSingelton.getInstance().getLogger().info("getObjectsToSynch, Current object is: " + currObject);
+			AppLogger.getLogger().info("getObjectsToSynch, Current object is: " + currObject);
 
 			// set a query to retrieve the columns of the current object
 			String uri = URL + API + VERSION +"/data-catalog/object-details/columns?object_name=" + currObject;
-			LoggerSingelton.getInstance().getLogger().info("IN getObjectsToSynch, uri is " + uri);
+			AppLogger.getLogger().fine("IN getObjectsToSynch, uri is " + uri);
 
 			HttpGet getRequest = new HttpGet(uri);
 			getRequest.setHeader("Authorization", TOKEN);
@@ -295,7 +297,7 @@ public class BigIdService {
 			proccessHttpResponse(response, uri);
 
 			JSONObject currentSFOjbect = new JSONObject(EntityUtils.toString(response.getEntity()));
-			LoggerSingelton.getInstance().getLogger().info("IN getObjectsToSynch, currentSFOjbect is: " + currentSFOjbect.toString());
+			AppLogger.getLogger().fine("IN getObjectsToSynch, currentSFOjbect is: " + currentSFOjbect.toString());
 
 			JSONObject data = currentSFOjbect.getJSONObject("data");
 			JSONArray columns = data.getJSONArray("results");
@@ -328,7 +330,7 @@ public class BigIdService {
 			}
 		}
 
-		LoggerSingelton.getInstance().getLogger().info("IN getObjectsToSynch, Columns to synch" + columnsToSynch.toString());
+		AppLogger.getLogger().fine("IN getObjectsToSynch, Columns to synch" + columnsToSynch.toString());
 
 		dealWithSalesforceComplexFields(columnsToSynch);
 
@@ -350,7 +352,7 @@ public class BigIdService {
 	 */
 	private void dealWithSalesforceComplexFields(ArrayList<ColumnToSynch> columnsToSynch) throws SecurityException, IOException {
 
-		LoggerSingelton.getInstance().getLogger().info("Begining of dealWithSalesforceComplexFields");
+		AppLogger.getLogger().info("Begining of dealWithSalesforceComplexFields");
 
 		ArrayList<ColumnToSynch> addressColumnsToDealWith = new ArrayList<ColumnToSynch>();
 		ArrayList<ColumnToSynch> addressColumnsToRemove = new ArrayList<ColumnToSynch>();
@@ -359,7 +361,7 @@ public class BigIdService {
 		ArrayList<ColumnToSynch> nameColumnsToRemove = new ArrayList<ColumnToSynch>();
 
 
-		// Iterae over the entrie columnsToSynch list and find the First field that to be dealt with
+		// Iterate over the entire columnsToSynch list and find the First field that to be dealt with
 		for (Iterator iterator = columnsToSynch.iterator(); iterator.hasNext();) {
 			ColumnToSynch columnToSynch = (ColumnToSynch) iterator.next();
 			if (columnToSynch.getColumnName().contains("City")) {
@@ -425,7 +427,7 @@ public class BigIdService {
 	 * 
 	 */
 	private ArrayList<String> getCategoriesForColumn(String currObject, ArrayList categoryAndColumnList, String column) throws SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Begining of getCategoriesForColumn");
+		AppLogger.getLogger().fine("Begining of getCategoriesForColumn");
 
 		ArrayList<String> categoriesFound = new ArrayList<String>();
 		for (Iterator iterator = categoryAndColumnList.iterator(); iterator.hasNext();) {
@@ -455,7 +457,7 @@ public class BigIdService {
 	 * 
 	 */
 	private ArrayList<CategoryColumnContainer> getCategoriesAndColumns(ArrayList<JSONObject> salesforceRelatedObjects) throws ParseException, ResponseNotOKException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-		LoggerSingelton.getInstance().getLogger().info("Begining of getCategoriesAndColumns");
+		AppLogger.getLogger().fine("Begining of getCategoriesAndColumns");
 
 		ArrayList<CategoryColumnContainer> categoriesAndColumsFound = new ArrayList<CategoryColumnContainer>();
 
@@ -464,7 +466,7 @@ public class BigIdService {
 
 			// set a query to retrieve the attributes of the object			
 			String uri = URL + API + VERSION +"/data-catalog/object-details/attributes?object_name=" + objectToSynch.getString("fullyQualifiedName");
-			LoggerSingelton.getInstance().getLogger().info("IN getObjectsToSynch, uri is: " + uri);
+			AppLogger.getLogger().fine("IN getObjectsToSynch, uri is: " + uri);
 
 			HttpGet getRequest = new HttpGet(uri);
 			getRequest.setHeader("Authorization", TOKEN);
@@ -480,7 +482,7 @@ public class BigIdService {
 			proccessHttpResponse(response, uri);
 
 			JSONObject currentSFOjbect = new JSONObject(EntityUtils.toString(response.getEntity()));
-			LoggerSingelton.getInstance().getLogger().info("IN getObjectsToSynch, currentSFOjbect is " + currentSFOjbect.toString());
+			AppLogger.getLogger().fine("IN getObjectsToSynch, currentSFOjbect is " + currentSFOjbect.toString());
 
 			JSONArray data = (JSONArray) currentSFOjbect.get("data");
 
@@ -527,7 +529,7 @@ public class BigIdService {
 	 */
 	private boolean duplicateCategoryColumnContainerExits(ArrayList<CategoryColumnContainer> categoriesAndColumsFound,
 			CategoryColumnContainer currCC) throws SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Begining of duplicateCategoryColumnContainerExits");
+		AppLogger.getLogger().fine("Begining of duplicateCategoryColumnContainerExits");
 
 		for (Iterator iterator = categoriesAndColumsFound.iterator(); iterator.hasNext();) {
 			CategoryColumnContainer categoryColumnContainer = (CategoryColumnContainer) iterator.next();
@@ -548,7 +550,7 @@ public class BigIdService {
 	 * 
 	 */
 	private ArrayList<JSONObject> getSalesforceObjectsFromDb() throws ResponseNotOKException, ParseException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-		LoggerSingelton.getInstance().getLogger().fine("Beginning of getSalesforceObjectsFromDb()");
+		AppLogger.getLogger().fine("Beginning of getSalesforceObjectsFromDb()");
 
 		String uri =  URL + API + VERSION + "/data-catalog?format=json&&sort=&filter=system=Salesforce";
 
@@ -565,7 +567,7 @@ public class BigIdService {
 
 		createClient();
 		HttpResponse response = client.execute(getRequest);
-		LoggerSingelton.getInstance().getLogger().info("IN getSalesforceObjectsFromDb, Status code is " + response.getStatusLine().getStatusCode() + " response is " + response.toString());
+		AppLogger.getLogger().fine("IN getSalesforceObjectsFromDb, Status code is " + response.getStatusLine().getStatusCode() + " response is " + response.toString());
 
 		proccessHttpResponse(response, uri);
 
@@ -584,7 +586,7 @@ public class BigIdService {
 				salesforceObjects.add(currentJson);						
 			}
 		}
-		LoggerSingelton.getInstance().getLogger().info("salesforceObjects to write: " + salesforceObjects.toString() );
+		AppLogger.getLogger().fine("salesforceObjects to write: " + salesforceObjects.toString() );
 		return salesforceObjects;
 	}
 
@@ -602,7 +604,7 @@ public class BigIdService {
 		if (statusCode == 200) {
 		}
 		else {
-			LoggerSingelton.getInstance().getLogger().severe("Response code for uri" + uri + "is " + statusCode + " response, reasonPhrase:" + response.getStatusLine().getReasonPhrase());
+			AppLogger.getLogger().severe("Response code for uri" + uri + "is " + statusCode + " response, reasonPhrase:" + response.getStatusLine().getReasonPhrase());
 			throw new ResponseNotOKException("Response code for uri " + uri + " is" +  statusCode);
 		}
 	}
@@ -620,7 +622,7 @@ public class BigIdService {
 	 * 
 	 */
 	public ArrayList<ColumnToSynch> getColumnsFromCorrelationsets() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, SecurityException, IOException, ParseException, ResponseNotOKException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of BigIdService.getColumnsFromCorrelationsets() {}");
+		AppLogger.getLogger().info("Beginning of BigIdService.getColumnsFromCorrelationsets() {}");
 
 		// https://yoram4.westeurope.cloudapp.azure.com/api/v1/id_connections
 		String uri = URL + API + VERSION + ID_CONNECTIOS;
@@ -640,7 +642,7 @@ public class BigIdService {
 
 		String result = EntityUtils.toString(response.getEntity());
 
-		LoggerSingelton.getInstance().getLogger().info("result string for uri: " + uri + ":" + result);
+		AppLogger.getLogger().fine("result string for uri: " + uri + ":" + result);
 
 		// Set the results into a JSONArray.  
 		JSONArray correlationSets  = new JSONObject(result).getJSONArray("id_connections");
@@ -662,7 +664,7 @@ public class BigIdService {
 			JSONArray attributes = jsonObject.getJSONArray("attributes");
 			for (int i = 0; i < attributes.length(); i++) {
 				JSONObject currentJson = (JSONObject) attributes.get(i);
-				if (currentJson.getBoolean("selection")) {
+				if ( !currentJson.isNull("selection") &&  currentJson.getBoolean("selection")) {
 					String tableName = jsonObject.getString("db_table");
 					ColumnToSynch currColumn = new ColumnToSynch("Salesforce" , tableName );
 					currColumn.setColumnName(currentJson.getString("columnName"));
@@ -690,18 +692,158 @@ public class BigIdService {
 	 *  FirstName, LastName --> Name
 	 */
 	private void convertPrimitve2Complex(ArrayList<ColumnToSynch> columnsToRetrieve) throws SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of BigIdService.convertPrimitve2Complex()");
+		AppLogger.getLogger().fine("Beginning of BigIdService.convertPrimitve2Complex(). columnsToRetrieve: " + columnsToRetrieve);
 
-		ArrayList<ColumnToSynch> columnsToDelete = new ArrayList<ColumnToSynch>();
-		
-		// Loop through the list and find the columns that are primitive
+		ArrayList<ColumnToSynch> addressColumns = new ArrayList<ColumnToSynch>();
+		ArrayList<ColumnToSynch> nameColumns = new ArrayList<ColumnToSynch>();
+
+		// Loop through the list and find the all the primitive columns that are of the type Address or Name
 		for (int i = 0; i < columnsToRetrieve.size(); i++) {
-			
-			
+			if ( columnsToRetrieve.get(i).getColumnName().contains("City") ||
+					columnsToRetrieve.get(i).getColumnName().contains("Country") ||
+					columnsToRetrieve.get(i).getColumnName().contains("PostalCode") ||
+					columnsToRetrieve.get(i).getColumnName().contains("State") ||
+					columnsToRetrieve.get(i).getColumnName().contains("Street")) {
+				addressColumns.add(columnsToRetrieve.get(i));
+			}
+			if (columnsToRetrieve.get(i).getColumnName().contains("FirstName") ||
+					columnsToRetrieve.get(i).getColumnName().contains("LastName")) {
+				nameColumns.add(columnsToRetrieve.get(i));				
+			}			
 		}
 
+		ArrayList<ColumnToSynch> addressPostfix = extractAddressPostfix(addressColumns);
+		ArrayList<ColumnToSynch> namePostfix = extractNamePrefix(nameColumns);
+
+		// loop through the list of the primitive Address columns to find if there is the complex field in the list
+		for (int j = 0; j < addressPostfix.size(); j++) {
+			Boolean ComlexFieldFound = false;
+			ColumnToSynch currentPostfix = addressPostfix.get(j);
+			ColumnToSynch temp = currentPostfix.deepCopy();
+			temp.setColumnName(currentPostfix.getColumnName()+ "Address");
+			for (int k = 0; k < columnsToRetrieve.size(); k++) {
+				ColumnToSynch currColumn = columnsToRetrieve.get(k);
+				if ( temp.equals(currColumn) ) {
+					ComlexFieldFound = true;
+				}
+			}
+			if (! ComlexFieldFound) {
+				currentPostfix.setColumnName(currentPostfix.getColumnName()+ "Address");
+				columnsToRetrieve.add(currentPostfix);
+			}
+		}
+		// remove the primitve types from columnsToRetrieve
+		columnsToRetrieve.removeAll(addressColumns);
+
+		// loop through the list of the primitive Name columns to find if there is the complex field in the list
+		for (int j = 0; j < namePostfix.size(); j++) {
+			Boolean ComlexFieldFound = false;
+			ColumnToSynch currentPostfix = namePostfix.get(j);
+			ColumnToSynch temp = currentPostfix.deepCopy();
+			temp.setColumnName(currentPostfix.getColumnName());
+			for (int k = 0; k < columnsToRetrieve.size(); k++) {
+				ColumnToSynch currColumn = columnsToRetrieve.get(k);
+				if ( temp.equals(currColumn) ) {
+					ComlexFieldFound = true;
+				}
+			}
+			if (! ComlexFieldFound) {
+				currentPostfix.setColumnName(currentPostfix.getColumnName());
+				columnsToRetrieve.add(currentPostfix);
+			}
+		}		
+		// remove the primitve types from columnsToRetrieve
+		columnsToRetrieve.removeAll(nameColumns);		
+
+		AppLogger.getLogger().fine("End of BigIdService.convertPrimitve2Complex(). columnsToRetrieve: " + columnsToRetrieve);	
 	}
 
+
+	/**	 
+	 * A method that extracts the postfix of the Name primitive columns
+	 * 
+	 * @param String column
+	 * @return void
+	 * @throws SecurityException 	 
+	 * @throws IOException 
+	 *  City, Country, PostalCode, State, Street --> Address
+	 *  FirstName, LastName --> Name
+	 */
+	private ArrayList<ColumnToSynch> extractNamePrefix(ArrayList<ColumnToSynch> nameColumns) {
+		ArrayList<ColumnToSynch> primitveColumnsPrefix = new ArrayList<ColumnToSynch>();
+
+		for (int i = 0; i < nameColumns.size(); i++) {
+			String currColumn = nameColumns.get(i).getColumnName();;
+			String currTableName = nameColumns.get(i).getTableFullyQualifiedName();
+			String currSource = nameColumns.get(i).getSource();
+			String currPrefix = "";
+			if ( nameColumns.get(i).getColumnName().contains("First") ){				
+				currPrefix = currColumn.substring(5, currColumn.length() );				
+			}
+			else if ( nameColumns.get(i).getColumnName().contains("Last") ) {
+				currPrefix = currColumn.substring(4, currColumn.length() );
+			}			
+			else {
+
+				// TODO raise an exception
+
+			}
+
+			ColumnToSynch currColumnToSynch = new ColumnToSynch(currSource, currTableName );
+			currColumnToSynch.setColumnName(currPrefix);
+			primitveColumnsPrefix.add(currColumnToSynch);
+		}
+
+		return primitveColumnsPrefix;
+	}
+
+	/**	 
+	 * A method that extracts the postfix of the Address primitive columns
+	 * 
+	 * @param String column
+	 * @return void
+	 * @throws SecurityException 	 
+	 * @throws IOException 
+	 *  City, Country, PostalCode, State, Street --> Address
+	 *  FirstName, LastName --> Name
+	 */
+	private ArrayList<ColumnToSynch> extractAddressPostfix(ArrayList<ColumnToSynch> addressColumns) {
+
+		ArrayList<ColumnToSynch> primitveColumnsPostfix = new ArrayList<ColumnToSynch>();
+
+		for (int i = 0; i < addressColumns.size(); i++) {
+			String currColumn = addressColumns.get(i).getColumnName();;
+			String currTableName = addressColumns.get(i).getTableFullyQualifiedName();
+			String currSource = addressColumns.get(i).getSource();
+			String currPostfix = "";
+			if ( addressColumns.get(i).getColumnName().contains("City") ){				
+				currPostfix = currColumn.substring(0, currColumn.length() - 4 );				
+			}
+			else if (addressColumns.get(i).getColumnName().contains("Country") ) {
+				currPostfix = currColumn.substring(0, currColumn.length() - 7 );
+			}
+			else if (addressColumns.get(i).getColumnName().contains("PostalCode") ) {
+				currPostfix = currColumn.substring(0, currColumn.length() - 10 );
+			}
+			else if (addressColumns.get(i).getColumnName().contains("State") ) {
+				currPostfix = currColumn.substring(0, currColumn.length() - 5 );
+			}
+			else if ( addressColumns.get(i).getColumnName().contains("Street") ) {
+				currPostfix = currColumn.substring(0, currColumn.length() - 6 );
+			}
+			else {
+
+				// TODO raise an exception
+
+			}
+
+			ColumnToSynch currColumnToSynch = new ColumnToSynch(currSource, currTableName );
+			currColumnToSynch.setColumnName(currPostfix);
+			primitveColumnsPostfix.add(currColumnToSynch);
+		}
+
+		return primitveColumnsPostfix;
+	}
 
 	/**	 
 	 * A method that converts a Salesforce complexField into its subfields becasue they are the fields that 
@@ -714,11 +856,54 @@ public class BigIdService {
 	 *  City, Country, PostalCode, State, Street --> Address
 	 *  FirstName, LastName --> Name
 	 */
-	private ArrayList<String> convertComplexField2Primitive(String column) throws SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of BigIdService.convertComplexField2Primitive()");
+	private void convertComplexField2Primitive(ArrayList<CategoryColumnContainer> complianceGroupToUpdate) throws SecurityException, IOException {
+		AppLogger.getLogger().fine("Beginning of BigIdService.convertComplexField2Primitive()");
 
-		return null;
+		ArrayList<CategoryColumnContainer> primitiveFields = new ArrayList<CategoryColumnContainer>();
+		ArrayList<CategoryColumnContainer> complexFieldsToDelete = new ArrayList<CategoryColumnContainer>();
 
+		for (int i = 0; i < complianceGroupToUpdate.size(); i++) {
+
+			// Each CategoryColumnContainer in the list has only 1 column in it.
+			CategoryColumnContainer currContainer = complianceGroupToUpdate.get(i);
+			String columnName = currContainer.getColumnNames().get(0);
+
+			if ( columnName.contains("Address")){				
+				String primitiveName = columnName.substring(0, columnName.length() - 7);
+				primitiveFields.add(new CategoryColumnContainer(primitiveName + "City", currContainer.getTableName() , currContainer.getCategories()));
+				primitiveFields.add(new CategoryColumnContainer(primitiveName + "Country", currContainer.getTableName() , currContainer.getCategories()));
+				primitiveFields.add(new CategoryColumnContainer(primitiveName + "PostalCode", currContainer.getTableName() , currContainer.getCategories()));
+				primitiveFields.add(new CategoryColumnContainer(primitiveName + "State", currContainer.getTableName() , currContainer.getCategories()));
+				primitiveFields.add(new CategoryColumnContainer(primitiveName + "Street", currContainer.getTableName() , currContainer.getCategories()));
+				complexFieldsToDelete.add(currContainer);
+
+			}
+			if (columnName.contains("Name") ) {				
+				primitiveFields.add(new CategoryColumnContainer("First" + columnName, currContainer.getTableName() , currContainer.getCategories()));
+				primitiveFields.add(new CategoryColumnContainer("Last" + columnName, currContainer.getTableName() , currContainer.getCategories()));
+				complexFieldsToDelete.add(currContainer);
+			}			
+		}
+
+		// Delete the complex fields from complianceGroupToUpdate list 
+		complianceGroupToUpdate.removeAll(complexFieldsToDelete);
+
+		// Add the primitive fields to complianceGroupToUpdate list ONLY IF the do not exist
+		for (int i = 0; i < primitiveFields.size(); i++) {
+			CategoryColumnContainer currPrimitiveContainer = primitiveFields.get(i);
+			boolean contains = false;
+			for (int j = 0; j < complianceGroupToUpdate.size(); j++) {
+				CategoryColumnContainer currComplexContainer = complianceGroupToUpdate.get(j);				
+				if (currPrimitiveContainer.equals(currComplexContainer)) {
+					contains = true;					
+				}				
+			}
+			if (! contains) {
+				complianceGroupToUpdate.add(currPrimitiveContainer);
+			}
+		}
+
+		AppLogger.getLogger().fine("End of BigIdService.convertComplexField2Primitive()");
 
 	}
 
@@ -740,7 +925,10 @@ public class BigIdService {
 	 * @throws ParseException 
 	 */
 	public void updateCorrelationSetWithComplianceGroup(ArrayList<CategoryColumnContainer> complianceGroupToUpdate) throws SecurityException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, ParseException, ResponseNotOKException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of BigIdService.updateCorrelationSetWithComplianceGroup() {}");
+		AppLogger.getLogger().info("Beginning of BigIdService.updateCorrelationSetWithComplianceGroup() {}");
+
+		// Deal with Salesforce complex fields: Address and Name
+		convertComplexField2Primitive(complianceGroupToUpdate);
 
 		// Loop through the array and execute each complianceGroup individually only if there are complianceGroupValues for the current column
 		for (int i = 0; i < complianceGroupToUpdate.size(); i++) {
@@ -749,21 +937,22 @@ public class BigIdService {
 			ArrayList<String> complianceGroupValues = complianceGroupToUpdate.get(i).getCategories();
 
 			if (! complianceGroupValues.isEmpty()) {
-
+				
+				ArrayList<JSONObject> previousCategories = getPreviousCategories(complianceGroupToUpdate.get(i).getColumnNames().get(0));
+				for(int k = 0; k < previousCategories.size(); k++) {
+					String currC = previousCategories.get(k).getString("display_name");
+					complianceGroupValues.remove(currC);
+				}				
+				
 				for (int j = 0; j < complianceGroupValues.size(); j++) {
 
 					// There is only 1 column in a CategoryColumnContainer so just get the first and only one.
-					String column = complianceGroupToUpdate.get(i).getColumnNames().get(0);
+					String column = complianceGroupToUpdate.get(i).getColumnNames().get(0);						
 
-					// Deal with Salesforce complex fields: Address and Name
-					if (  column.contains("Address") || column.contains("Name") ) {
-						convertComplexField2Primitive(column);
-					}
-
-					// Get the category and the category's unique_name
-					String category = complianceGroupValues.get(j);
-					String _id = getCategory_id(category);
-					String previousCategories = getPreviousCategories(column);
+					// Get the category, the category's unique_name (glossay_id), and previous categories
+					String newCategory = complianceGroupValues.get(j);
+					String new_glossary_id = getGlossary_id(newCategory);
+					previousCategories = getPreviousCategories(column);
 
 					String uri = URL + "/api/v1/attributes";
 
@@ -772,14 +961,24 @@ public class BigIdService {
 					httpPostRequest.setHeader("Accept", "application/json");
 					httpPostRequest.setHeader("Content-type", "application/json");					
 
-					LoggerSingelton.getInstance().getLogger().info("postNewCategories. currCategory = " + complianceGroupValues);
+					AppLogger.getLogger().fine("postNewCategories. currCategory = " + newCategory);						
+					
+					JSONObject jsonPostObject = new JSONObject();
+					jsonPostObject.put("original_name", column);
+					jsonPostObject.putOpt("glossary_id", null);
+					jsonPostObject.put("friendly_name", column);
+					jsonPostObject.put("isShow", true);
+					jsonPostObject.put("type", "idsor_attributes");
+					jsonPostObject.put("showImage", "true");
+					jsonPostObject.put("attributeSelected", "true");
+					JSONObject newCat = new JSONObject();
+					newCat.put("display_name", newCategory);
+					newCat.put("unique_name", new_glossary_id);	
+					previousCategories.add(newCat);					
+					jsonPostObject.put("categories", previousCategories);	
+					JSONArray jsonPostArray = new JSONArray().put(jsonPostObject);
 
-					LocalDateTime today = LocalDateTime.now();					
-
-					JSONArray jsonPostArray = new JSONArray("[{\"original_name\":" + column + ",\"glossary_id\":" + null + ",\"friendly_name\":" + column + ",\"description\":" + "\"Imported from Salesforce on - " + today + "\"" +
-							",\"isShow\":" + true + ",\"categories\":[{" + "\"display_name\":" + category + ",\"unique_name\":" + _id + "}" + previousCategories + "]" + ",\"type\":" + "\"idsor_attributes\"" + "}]");
-
-					LoggerSingelton.getInstance().getLogger().info("JsonObject when posting a new complianceGroup " + jsonPostArray.toString());
+					AppLogger.getLogger().fine("JsonObject when posting a new complianceGroup " + jsonPostObject.toString());
 
 					StringEntity params = new StringEntity(jsonPostArray.toString());
 					httpPostRequest.setEntity(params);
@@ -791,7 +990,7 @@ public class BigIdService {
 					// create a new client for each iteration
 					createClient();			
 					HttpResponse response = client.execute(httpPostRequest);
-					LoggerSingelton.getInstance().getLogger().info("updateCorrelationSetWithComplianceGroup. After client.execute(httpPostRequest). field: " + column + ", value: " + complianceGroupValues);
+					AppLogger.getLogger().info("updateCorrelationSetWithComplianceGroup. After execute(). field: " + column + ", value: " + newCategory);
 
 					proccessHttpResponse(response, uri);
 				}
@@ -799,7 +998,7 @@ public class BigIdService {
 		}	
 	}
 
-
+	
 	/**	 
 	 * A helper method to get the unique_name of a specific category
 	 * 
@@ -813,8 +1012,8 @@ public class BigIdService {
 	 * @throws ParseException 
 	 * @throws ResponseNotOKException 	 
 	 */
-	private String getPreviousCategories(String column) throws SecurityException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, ParseException, ResponseNotOKException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of getCategory()");
+	private ArrayList<JSONObject> getPreviousCategories(String column) throws SecurityException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, ParseException, ResponseNotOKException {
+		AppLogger.getLogger().fine("Beginning of getPreviousCategories()");
 
 		String uri = URL + "/api/v1/lineage/attributes";
 
@@ -833,9 +1032,10 @@ public class BigIdService {
 
 		String result = EntityUtils.toString(response.getEntity());
 
-		//LoggerSingelton.getInstance().getLogger().info("result string for uri: " + uri + ":" + result);
+		//AppLogger.getLogger().info("result string for uri: " + uri + ":" + result);
 
 		String categoriesString = "";
+		ArrayList<JSONObject> previousCategories = new ArrayList<JSONObject>();
 
 		// Go down the Jsonobject hierarchy until reaching the list of attributes and their categories.
 		JSONObject Jresult  = new JSONObject(result);
@@ -849,27 +1049,28 @@ public class BigIdService {
 
 				// There could be attributes that do not have a category or categories
 				if (! idsor_attributes.getJSONObject(i).isNull("categories")) {
-					JSONArray categories = idsor_attributes.getJSONObject(i).getJSONArray("categories");
-
+					JSONArray categories = idsor_attributes.getJSONObject(i).getJSONArray("categories");					
 					for (int k = 0; k < categories.length(); k++) {
-
 						// TODO temporary fix for dealing with garbage categories that are not displayed. 
 						// Only if there is a display_name than copy them to categoriesString
-
 						if (! categories.getJSONObject(k).isNull("display_name") ) {
-							categoriesString = categoriesString + ",{display_name: " + 
-									categories.getJSONObject(k).getString("display_name") + ", _id: " +
-									categories.getJSONObject(k).getString("_id") + "}";
-						}
+							JSONObject currCategory = new JSONObject();
+							currCategory.put("_id", categories.getJSONObject(k).getString("unique_name"));
+							currCategory.put("color", categories.getJSONObject(k).getString("color"));
+							currCategory.put("display_name", categories.getJSONObject(k).getString("display_name"));
+							currCategory.put("glossary_id", categories.getJSONObject(k).getString("unique_name"));
+							currCategory.put("unique_name", categories.getJSONObject(k).getString("unique_name"));
+							//currCategory.put("description", categories.getJSONObject(k).getString("description"));
+							previousCategories.add(currCategory);
+						}						
 					}
-					break;
-
 				}
 			}
 
 		}
-		return categoriesString;
-	}
+		return previousCategories;
+	}			
+
 
 	/**	 
 	 * A helper method to get the unique_name of a specific category
@@ -884,9 +1085,9 @@ public class BigIdService {
 	 * @throws KeyManagementException 
 	 * @throws SecurityException 	 
 	 */
-	private String getCategory_id(String category) throws KeyManagementException, ClientProtocolException, NoSuchAlgorithmException, KeyStoreException, IOException, ResponseNotOKException {
+	private String getGlossary_id(String category) throws KeyManagementException, ClientProtocolException, NoSuchAlgorithmException, KeyStoreException, IOException, ResponseNotOKException {
 
-		LoggerSingelton.getInstance().getLogger().info("Beginning of getCategoryUniqueName()");
+		AppLogger.getLogger().fine("Beginning of getGlossary_id()");
 		String uri = URL + API + VERSION + DATA_CATEGORIES;
 
 		HttpGet getRequest = new HttpGet(uri);
@@ -904,7 +1105,7 @@ public class BigIdService {
 
 		String result = EntityUtils.toString(response.getEntity());
 
-		//LoggerSingelton.getInstance().getLogger().info("result string for uri: " + uri + ":" + result);
+		AppLogger.getLogger().fine("result string for uri: " + uri + ":" + result);
 
 		// Set the results into a JSONArray. An array is used because there may be more than one category 
 		JSONArray categories  = new JSONArray(result);
@@ -912,8 +1113,9 @@ public class BigIdService {
 		for (int i = 0; i < categories.length(); i++) {
 			JSONObject currentJson = categories.getJSONObject(i);			
 			if (category.equals(currentJson.getString("name"))) {
-				JSONArray jArray = currentJson.getJSONArray("dc");
-				String uniqu_name = ((JSONObject) jArray.get(0)).getString("_id");
+				//JSONArray jArray = currentJson.getJSONArray("dc");
+				String uniqu_name = currentJson.getString("glossary_id");
+				//String uniqu_name = ((JSONObject) jArray.get(0)).getString("_id");
 				return uniqu_name;
 			}
 

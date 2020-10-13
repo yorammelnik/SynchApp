@@ -8,8 +8,8 @@
 		<BigId_password>bigid111</BigId_password>	
 		<Salesforce_url>https://login.salesforce.com/services/Soap/c/49.0</Salesforce_url>
 		<Salesforce_username>yorammelnik@gmail.com</Salesforce_username>
-		<Salesforce_password>Koper0520</Salesforce_password>
-		<Salesforce_token>lg9uKgktCDpPtglUSo3cV0oE</Salesforce_token>
-		<Synch_categories_to_Salesforce>false</Synch_categories_to_Salesforce>		
+		<Salesforce_password>Yoya2021</Salesforce_password>
+		<Salesforce_token>6BS8UStPYgI4NyhRPWcYQLJT</Salesforce_token>
+		<Synch_categories_to_Salesforce>true</Synch_categories_to_Salesforce>		
 	</LoginData>
 </config>

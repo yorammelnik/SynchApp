@@ -27,8 +27,9 @@ import com.sforce.soap.metadata.RetrieveResult;
 import com.sforce.soap.metadata.RetrieveStatus;
 import com.sforce.ws.ConnectionException;
 
+import SpringApp.Controllers.AppLogger;
 import appController.FileManipulationService;
-import appController.LoggerSingelton;
+import appController.LoggerSingeltonnnnn;
 import bigIdService.ColumnToSynch;
 
 
@@ -64,7 +65,7 @@ public class RetrieveMetadata {
 	 */
 	public File retrieveZip(ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws RemoteException, Exception
 	{
-		LoggerSingelton.getInstance().getLogger().info("Beginning of retrieveZipFile()");
+		AppLogger.getLogger().info("Beginning of retrieveZipFile()");
 
 		RetrieveRequest retrieveRequest = new RetrieveRequest();
 		// The version in package.xml overrides the version in RetrieveRequest
@@ -91,7 +92,7 @@ public class RetrieveMetadata {
 			}
 			result = metadataConnection.checkRetrieveStatus(
 					asyncResultId, true);
-			LoggerSingelton.getInstance().getLogger().info("Retrieve Status: " + result.getStatus());
+			AppLogger.getLogger().info("Retrieve Status: " + result.getStatus());
 		} while (!result.isDone());
 
 		if (result.getStatus() == RetrieveStatus.Failed) {
@@ -108,19 +109,19 @@ public class RetrieveMetadata {
 				}
 			}
 			if (buf.length() > 0) {
-				LoggerSingelton.getInstance().getLogger().info("Retrieve warnings:\n" + buf);
+				AppLogger.getLogger().info("Retrieve warnings:\n" + buf);
 				
 			}
 
 			// Write the zip to the file system			
-			LoggerSingelton.getInstance().getLogger().info("Writing results to zip file");
+			AppLogger.getLogger().info("Writing results to zip file");
 			ByteArrayInputStream bais = new ByteArrayInputStream(result.getZipFile());				
 			
-			String path = FileManipulationService.getResourceDirectory();
-			LoggerSingelton.getInstance().getLogger().info("Line 120. String path: " + path);
+			String path = SalesforceMetadataService.getTempDirectory();
+			AppLogger.getLogger().info("Line 120. String path: " + path);
 			
 			Path resultFilePath = Paths.get(path, SalesforceMetadataService.getRetrieveResultFile());			
-			LoggerSingelton.getInstance().getLogger().info("Line 122. Path resultFilePath: " + resultFilePath.toAbsolutePath().toString());
+			AppLogger.getLogger().info("Line 122. Path resultFilePath: " + resultFilePath.toAbsolutePath().toString());
 						
 			FileOutputStream os = new FileOutputStream(resultFilePath.toAbsolutePath().toString());
 			
@@ -128,7 +129,7 @@ public class RetrieveMetadata {
 				ReadableByteChannel src = Channels.newChannel(bais);
 				FileChannel dest = os.getChannel();
 				copy(src, dest);				
-				LoggerSingelton.getInstance().getLogger().info("in retrieveZip(). Results written to " + resultFilePath.toAbsolutePath().toString());
+				AppLogger.getLogger().info("in retrieveZip(). Results written to " + resultFilePath.toAbsolutePath().toString());
 				
 			} finally {
 				os.close();
@@ -145,7 +146,7 @@ public class RetrieveMetadata {
 	 */
 	@SuppressWarnings("rawtypes")
 	private void setUnpackaged(RetrieveRequest request, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of setUnpackaged()");		
+		AppLogger.getLogger().info("Beginning of setUnpackaged()");		
 
 		List<PackageTypeMembers> pd = new ArrayList<PackageTypeMembers>();
 
@@ -181,7 +182,7 @@ public class RetrieveMetadata {
 	private void copy(ReadableByteChannel src, WritableByteChannel dest)
 			throws IOException
 	{
-		LoggerSingelton.getInstance().getLogger().info("Beginning of copy()");
+		AppLogger.getLogger().info("Beginning of copy()");
 		// Use an in-memory byte buffer
 		ByteBuffer buffer = ByteBuffer.allocate(8092);
 		while (src.read(buffer) != -1) {

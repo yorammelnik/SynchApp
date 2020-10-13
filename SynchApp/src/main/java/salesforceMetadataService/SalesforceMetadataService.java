@@ -2,6 +2,7 @@ package salesforceMetadataService;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
@@ -24,8 +25,9 @@ import com.sforce.soap.metadata.StandardValueSet;
 import com.sforce.soap.metadata.UpsertResult;
 import com.sforce.ws.ConnectionException;
 
+import SpringApp.Controllers.AppLogger;
 import appController.FileManipulationService;
-import appController.LoggerSingelton;
+import appController.LoggerSingeltonnnnn;
 import bigIdService.CategoryColumnContainer;
 import bigIdService.ColumnToSynch;
 import net.lingala.zip4j.exception.ZipException;
@@ -44,35 +46,44 @@ public class SalesforceMetadataService {
 	private final String COMPLIANCE_GROUP = "ComplianceGroup";
 
 	private MetadataConnection metadataConnection = null;
-	
+
 	// Directories and files that are used for deployment of the complianceGroup metadata
 	private final String UNZIPPED_DIRECTORY = "unzipped";
 	private final String UNPACKAGED_DIRECTORY = "unpackaged";
 	private final String ZIP_TO_UPLOAD_FILE = "zipToUpload.zip";
 	private final static String RETRIEVE_RESULT = "retrieveResult.zip";
+	
+	private static String zipTempDirectoryPath;
 
 	// This file is used by RetrieveMetada class.
 	// For clarity of all the files used with Salesforce it is declared in this class.
 	public static String getRetrieveResultFile() {
 		return RETRIEVE_RESULT;
 	}
-	
-	
+
+
+	public SalesforceMetadataService() throws IOException {
+		String customDirPrefix = "ZipFiles_BidId_Salesforce_App_";
+		Path tempDirectory = Paths.get( Files.createTempDirectory(customDirPrefix).toAbsolutePath().toString() );
+		zipTempDirectoryPath = tempDirectory.toAbsolutePath().toString();
+	}
+
+
 	// Use MetadateUtil class to connect to Salesforce and return a metadata connection
 	public void connect(String url, String userName, String password, String token) throws ConnectionException, SecurityException, IOException  {
-		LoggerSingelton.getInstance().getLogger().fine("Beginning of connect() {}");
+		AppLogger.getLogger().fine("Beginning of connect() {}");
 		metadataConnection = MetadataLoginUtil.login( url,  userName,  password,  token);	
 
 		// If the connection fails an exception will porpagate all the way back to main method
 	}
-	
+
 	/**	 
 	 * Get all the complianceGroupValues from Salesforce
 	 * @throws IOException 
 	 * @throws SecurityException 
 	 */	
 	public ArrayList<String> getComplianceGroupValues() throws ConnectionException, SecurityException, IOException{
-		LoggerSingelton.getInstance().getLogger().info("Beginning of getComplianceGroupValues()");
+		AppLogger.getLogger().info("Beginning of getComplianceGroupValues()");
 
 		MetadataValuesContainer valuesContainer = getMedatadataValue(TYPE, COMPLIANCE_GROUP);
 
@@ -86,9 +97,9 @@ public class SalesforceMetadataService {
 	 * @throws IOException 
 	 * @throws SecurityException 
 	 */ 
-	
+
 	private MetadataValuesContainer getMedatadataValue(String type, String typeName) throws ConnectionException, SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of getMedatadataValue()");
+		AppLogger.getLogger().info("Beginning of getMedatadataValue()");
 
 		MetadataValuesContainer container = new MetadataValuesContainer();
 
@@ -111,7 +122,7 @@ public class SalesforceMetadataService {
 			container.setCurrentSet(currSet);
 		} 
 		else { // Empty metadata
-			LoggerSingelton.getInstance().getLogger().warning("In getMedatadataValue(). Metadata type");
+			AppLogger.getLogger().warning("In getMedatadataValue(). Metadata type");
 		}
 
 		return container;
@@ -123,7 +134,7 @@ public class SalesforceMetadataService {
 	 * @throws SecurityException 
 	 */ 
 	public void addNewMetadataValue(ArrayList<String> newCategories) throws ConnectionException, SecurityException, IOException  {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of addNewMetadataValue()");
+		AppLogger.getLogger().info("Beginning of addNewMetadataValue()");
 
 		// Get current compliance group values from Salesforce and add them to the new items - metadata api requirement.
 		// Inserting only new items to the metada will disactive the old values. Therefore we insert all of them again
@@ -156,7 +167,7 @@ public class SalesforceMetadataService {
 
 		@SuppressWarnings("unused")
 		UpsertResult[] results = metadataConnection.upsertMetadata(new Metadata[] { newSet });
-		LoggerSingelton.getInstance().getLogger().info("Inserting {} new metadata complianceGroup values to Salesforce");
+		AppLogger.getLogger().info("Inserting {} new metadata complianceGroup values to Salesforce");
 
 		//  If the updateMetadata fails an exception will porpagate all the way back to main method		
 	}
@@ -165,19 +176,19 @@ public class SalesforceMetadataService {
 	 * A method that deploys all new attributes from BigId to Salesforce
 	 */
 	public void deployAttributes(Boolean OVERWRITE_SF, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws RemoteException, Exception {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of deployAttributes(). newAttributes lists:");
-		
+		AppLogger.getLogger().info("Beginning of deployAttributes(). newAttributes lists:");
+
 		RetrieveMetadata ret = new RetrieveMetadata(metadataConnection);
 		File retrieveResult = ret.retrieveZip(bigIdColumnsToSynch);	
-		
+
 		// unzip the file, update the complianceGroup tags, and zip the files back
 		String newZipFileToUpload = updateRetrievedData(OVERWRITE_SF, retrieveResult.getAbsolutePath(), bigIdColumnsToSynch);
-				
+
 		// Deploy the new zip back to SF
 		DeployMetada deploy = new DeployMetada(newZipFileToUpload, metadataConnection);
 		deploy.deployZip();
 	}
-	
+
 	/**	 
 	 * A method that updates BigId categories for all the fields that were retrieved from Salesforce
 	 * 1. Unzip the retrieved.zip from Salesforce
@@ -185,30 +196,30 @@ public class SalesforceMetadataService {
 	 * 3. create a new zip ready to deploy to Salesforce
 	 */
 	private String updateRetrievedData(Boolean OVERWRITE_SF, String retrievedZipFilePath, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws URISyntaxException, XMLStreamException, IOException, ParserConfigurationException, SAXException, TransformerException, ZipException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of updateRetrievedData()");
-		
-		Path unzippedDirectoryPath = Paths.get(FileManipulationService.getResourceDirectory(), UNZIPPED_DIRECTORY);
-		
-		LoggerSingelton.getInstance().getLogger().info("In updateRetrievedData(), Line 193, UNZIPPED_DIRECTORY: " +UNZIPPED_DIRECTORY);
-		LoggerSingelton.getInstance().getLogger().info("In updateRetrievedData(), Line 143, FileManipulationService.getResourceDirectory(): " + FileManipulationService.getResourceDirectory() );
-		LoggerSingelton.getInstance().getLogger().info("In updateRetrievedData(), Line 195, path: " + unzippedDirectoryPath.toAbsolutePath().toString());
-		LoggerSingelton.getInstance().getLogger().info("In updateRetrievedData(), Line 196, retrievedZipFilePath: " + retrievedZipFilePath);
-		
+		AppLogger.getLogger().info("Beginning of updateRetrievedData()");
+
+		Path unzippedDirectoryPath = Paths.get(getTempDirectory(), UNZIPPED_DIRECTORY);
+
+		AppLogger.getLogger().fine("In updateRetrievedData(), Line 193, UNZIPPED_DIRECTORY: " +UNZIPPED_DIRECTORY);
+		AppLogger.getLogger().fine("In updateRetrievedData(), Line 143, FileManipulationService.getResourceDirectory(): " + getTempDirectory() );
+		AppLogger.getLogger().fine("In updateRetrievedData(), Line 195, path: " + unzippedDirectoryPath.toAbsolutePath().toString());
+		AppLogger.getLogger().fine("In updateRetrievedData(), Line 196, retrievedZipFilePath: " + retrievedZipFilePath);
+
 		String unzippedDirectory = FileManipulationService.extractZipFile(retrievedZipFilePath, unzippedDirectoryPath.toString() );		
-		
+
 		FileManipulationService.addComplianceGroupToZipFile(OVERWRITE_SF, unzippedDirectory, bigIdColumnsToSynch);
-		
-		Path zipToUploadPath = Paths.get(FileManipulationService.getResourceDirectory() , ZIP_TO_UPLOAD_FILE);
-				
-		Path directoryToZipPath = Paths.get(FileManipulationService.getResourceDirectory() , UNZIPPED_DIRECTORY, UNPACKAGED_DIRECTORY);
-		
+
+		Path zipToUploadPath = Paths.get(getTempDirectory() , ZIP_TO_UPLOAD_FILE);
+
+		Path directoryToZipPath = Paths.get(getTempDirectory() , UNZIPPED_DIRECTORY, UNPACKAGED_DIRECTORY);
+
 		FileManipulationService.zip(zipToUploadPath.toString(), directoryToZipPath.toString());	
-		
+
 		return zipToUploadPath.toString();		
 
 	}
-	
-	
+
+
 	/**	 
 	 * A method that uses SalesforceMetadataService (through RetrieveMetadata) to retrieve the specific fields with their 
 	 * complianceGroup value from Salesforce
@@ -217,15 +228,21 @@ public class SalesforceMetadataService {
 	 * 
 	 */
 	public ArrayList<CategoryColumnContainer> retrieveCorrelationSetColumnsFromSalesforce(ArrayList<ColumnToSynch> columns) throws Exception {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of retrieveCorrelationSetColumns()");
-		
+		AppLogger.getLogger().info("Beginning of retrieveCorrelationSetColumns()");
+
 		RetrieveMetadata ret = new RetrieveMetadata(metadataConnection);
 		File retrieveResult = ret.retrieveZip(columns);
-		
+
 		ArrayList<String> files = FileManipulationService.getFilesFromZipfile(retrieveResult);
-		
+
 		return FileManipulationService.readComplianceGroupfieldAndValues(files);		
-			
+
 	}
-		
+
+	// Get temp directory from everywhere in the project
+	public static String getTempDirectory() throws IOException {
+		//Path resourceDirectory = Paths.get("src","main","resources");		
+		return zipTempDirectoryPath;
+	}
+
 }

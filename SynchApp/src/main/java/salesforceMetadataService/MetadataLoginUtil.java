@@ -7,7 +7,8 @@ import com.sforce.soap.metadata.MetadataConnection;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
-import appController.LoggerSingelton;
+import SpringApp.Controllers.AppLogger;
+import appController.LoggerSingeltonnnnn;
 
 /**
  * Salesforce Metadata Api Login utility.
@@ -16,7 +17,7 @@ public class MetadataLoginUtil {
 
 
 	public static MetadataConnection login(String url, String userName, String password, String token) throws ConnectionException, SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of login()");
+		AppLogger.getLogger().info("Beginning of login()");
 
 		String URL = url; 
 		String USERNAME = userName;        
@@ -30,7 +31,7 @@ public class MetadataLoginUtil {
 
 	private static MetadataConnection createMetadataConnection(
 			final LoginResult loginResult) throws ConnectionException, SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of createMetadataConnection()");
+		AppLogger.getLogger().info("Beginning of createMetadataConnection()");
 
 		final ConnectorConfig config = new ConnectorConfig();
 		config.setServiceEndpoint(loginResult.getMetadataServerUrl());
@@ -44,7 +45,7 @@ public class MetadataLoginUtil {
 			final String username,
 			final String password,
 			final String loginUrl) throws ConnectionException, SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of loginToSalesforce()");
+		AppLogger.getLogger().info("Beginning of loginToSalesforce()");
 
 		final ConnectorConfig config = new ConnectorConfig();
 		config.setAuthEndpoint(loginUrl);

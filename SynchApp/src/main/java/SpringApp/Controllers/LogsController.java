@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 
 import com.bigid.appinfra.appinfrastructure.Controllers.AbstractLoggingController;
 
-import appController.LoggerSingelton;
+import appController.LoggerSingeltonnnnn;
 
 @Controller
 public class LogsController implements AbstractLoggingController {
@@ -19,13 +19,13 @@ public class LogsController implements AbstractLoggingController {
     	// Get synch app's log file    	
     	String logFile = null;
     	try {
-			logFile = appController.BigIdSalesforceAppController.getLogfile();
+			logFile = AppLogger.getLogFile();
 		} catch (FileNotFoundException e) {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
 			try {
-				LoggerSingelton.getInstance().getLogger().severe("error log Stack trace:"+ sw.toString());
+				LoggerSingeltonnnnn.getInstance().severe("error log Stack trace:"+ sw.toString());
 			} catch (Exception e1) {				
 				e1.printStackTrace();
 			}			

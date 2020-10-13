@@ -20,6 +20,25 @@ public class ColumnToSynch {
 	public String getSource() {
 		return source;
 	}
+	
+	public ColumnToSynch deepCopy() {
+		ColumnToSynch newColumn = new ColumnToSynch(source, tableFullyQualifiedName);
+		newColumn.setCategories(categories);
+		newColumn.setColumnName(columnName);
+		newColumn.setAttributes(attributes);
+		return newColumn;
+	}
+	
+	public boolean equals(Object other) {
+		if (this.source.equals( ((ColumnToSynch) other).getSource()) &&
+				this.tableFullyQualifiedName.equals( ((ColumnToSynch) other).getTableFullyQualifiedName()) &&
+						this.columnName.equals( ((ColumnToSynch) other).getColumnName()) ){
+			return true;
+		}
+		return false;
+				
+	}
+	
 	public String toString() {
 		return new String(tableFullyQualifiedName + " ," + columnName + " ," + attributes.toString()  +  " ," + categories.toString() );
 	}

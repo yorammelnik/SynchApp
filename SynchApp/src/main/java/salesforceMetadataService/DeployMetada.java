@@ -18,7 +18,8 @@ import com.sforce.soap.metadata.RunTestFailure;
 import com.sforce.soap.metadata.RunTestsResult;
 import com.sforce.ws.ConnectionException;
 
-import appController.LoggerSingelton;
+import SpringApp.Controllers.AppLogger;
+import appController.LoggerSingeltonnnnn;
 
 /**
  * Deploy a zip file of metadata components. 
@@ -48,7 +49,7 @@ public class DeployMetada {
     public void deployZip()
         throws RemoteException, Exception
     {
-    	LoggerSingelton.getInstance().getLogger().info("Beginning of deployZip");
+    	AppLogger.getLogger().info("Beginning of deployZip");
     	
         byte zipBytes[] = readZipFile();
         DeployOptions deployOptions = new DeployOptions();
@@ -76,7 +77,7 @@ public class DeployMetada {
             // Fetch in-progress details once for every 3 polls
             fetchDetails = (poll % 3 == 0);
             deployResult = metadataConnection.checkDeployStatus(asyncResultId, fetchDetails);
-            LoggerSingelton.getInstance().getLogger().info("Status is: " + deployResult.getStatus());
+            AppLogger.getLogger().info("Status is: " + deployResult.getStatus());
             if (!deployResult.isDone() && fetchDetails) {
                 printErrors(deployResult, "Failures for deployment in progress:\n");
             }
@@ -96,7 +97,7 @@ public class DeployMetada {
             throw new Exception("The files were not successfully deployed");
         }      
         
-        LoggerSingelton.getInstance().getLogger().info("The file " + ZIP_FILE + " was successfully deployed");
+        AppLogger.getLogger().info("The file " + ZIP_FILE + " was successfully deployed");
     }
     
     /**
@@ -107,7 +108,7 @@ public class DeployMetada {
     private byte[] readZipFile()
         throws Exception
     {
-    	LoggerSingelton.getInstance().getLogger().info("Beginning of readZipFile");
+    	AppLogger.getLogger().info("Beginning of readZipFile");
         // We assume here that you have a deploy.zip file.
         // See the retrieve sample for how to retrieve a zip file.
         File deployZip = new File(ZIP_FILE);
@@ -135,7 +136,7 @@ public class DeployMetada {
      */
     private void printErrors(DeployResult result, String messageHeader) throws SecurityException, IOException
     {
-    	LoggerSingelton.getInstance().getLogger().info("Beginning of printErrors");
+    	AppLogger.getLogger().info("Beginning of printErrors");
         DeployDetails deployDetails = result.getDetails();
         
         StringBuilder errorMessageBuilder = new StringBuilder();
@@ -178,7 +179,7 @@ public class DeployMetada {
         
         if (errorMessageBuilder.length() > 0) {
             errorMessageBuilder.insert(0, messageHeader);            
-            LoggerSingelton.getInstance().getLogger().info("End of printErrors(). Errors: " + errorMessageBuilder.toString());
+            AppLogger.getLogger().info("End of printErrors(). Errors: " + errorMessageBuilder.toString());
         }
     }    
 }

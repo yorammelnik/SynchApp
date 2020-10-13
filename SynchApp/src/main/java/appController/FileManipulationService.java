@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -34,8 +35,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.google.common.io.Files;
-
+import SpringApp.Controllers.AppLogger;
 import bigIdService.CategoryColumnContainer;
 import bigIdService.ColumnToSynch;
 import net.lingala.zip4j.ZipFile;
@@ -77,7 +77,7 @@ public class FileManipulationService {
 	 */
 
 	public LoginData readConfig(InputStream in2) throws XMLStreamException, SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of readConfig() {}");
+		AppLogger.getLogger().info("Beginning of readConfig() {}");
 
 		LoginData item = new LoginData();
 
@@ -153,7 +153,7 @@ public class FileManipulationService {
 	 *
 	 */
 	public static String extractZipFile(String zipFilePath, String outputDirectory) throws XMLStreamException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of extractZipFile()");		
+		AppLogger.getLogger().info("Beginning of extractZipFile()");		
 
 		byte[] buffer = new byte[1024];
 
@@ -190,7 +190,7 @@ public class FileManipulationService {
 		zis.closeEntry();
 		zis.close();		
 
-		LoggerSingelton.getInstance().getLogger().info("In extractZipFile(). outputDirectory: " + outputDirectory);
+		AppLogger.getLogger().fine("In extractZipFile(). outputDirectory: " + outputDirectory);
 		return outputDirectory;
 	}
 
@@ -203,7 +203,7 @@ public class FileManipulationService {
 	 *  
 	 */
 	public static void zip(String zipFileString, String directoryToZip) throws IOException, ZipException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of zip().");
+		AppLogger.getLogger().info("Beginning of zip().");
 
 		ArrayList<File> fileList = new ArrayList<File>();
 		getAllFiles(new File(directoryToZip), fileList);			
@@ -223,7 +223,7 @@ public class FileManipulationService {
 
 		zip.addFolder(new File(directoryToZip), parameters);		
 
-		LoggerSingelton.getInstance().getLogger().info("In zip(). New zip file:");
+		AppLogger.getLogger().fine("In zip(). New zip file:");
 
 	}
 
@@ -237,7 +237,7 @@ public class FileManipulationService {
 	 * @throws SecurityException 
 	 */
 	public static ArrayList<String> getAllFileList(File file) throws SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of getAllFileList(). File is " + file);
+		AppLogger.getLogger().fine("Beginning of getAllFileList(). File is " + file);
 		ArrayList<String> result = new ArrayList<String>();
 		/** add the file only */
 		if (file.isFile()) {
@@ -261,18 +261,18 @@ public class FileManipulationService {
 	 * 
 	 */
 	public static void getAllFiles(File dir, List<File> fileList) throws SecurityException, IOException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of getAllFiles");
+		AppLogger.getLogger().fine("Beginning of getAllFiles");
 		try {
 			File[] files = dir.listFiles();
 			for (File file : files) {
 				fileList.add(file);
 				if (file.isDirectory()) {
 
-					LoggerSingelton.getInstance().getLogger().info("directory:" + file.getCanonicalPath());
+					AppLogger.getLogger().fine("directory:" + file.getCanonicalPath());
 					getAllFiles(file, fileList);
 				} else {
 
-					LoggerSingelton.getInstance().getLogger().info("file:" + file.getCanonicalPath());
+					AppLogger.getLogger().fine("file:" + file.getCanonicalPath());
 				}
 			}
 		} catch (IOException e) {
@@ -288,7 +288,7 @@ public class FileManipulationService {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static void addComplianceGroupToZipFile(Boolean OVERWRITE_COMPLIANCE_TAGS, String baseDirectory, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws XMLStreamException, ParserConfigurationException, SAXException, IOException, TransformerException {
-		LoggerSingelton.getInstance().getLogger().info("Start of addComplianceGroupToZip()");
+		AppLogger.getLogger().info("Start of addComplianceGroupToZip()");
 
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -301,7 +301,7 @@ public class FileManipulationService {
 		ArrayList<String> filesToManipulate = FileManipulationService.getAllFileList(directoryToZip);
 
 		for (String file : filesToManipulate) {
-			LoggerSingelton.getInstance().getLogger().info("In addComplianceGroupToZipFile() filesToManipulate loop. Current file is: " + file);
+			AppLogger.getLogger().info("In addComplianceGroupToZipFile() filesToManipulate loop. Current file is: " + file);
 
 			// -Ignore package.xml file
 			if (file.contains("package.xml")) {	
@@ -391,7 +391,7 @@ public class FileManipulationService {
 
 	// A method that extracts from the string the complianceGroup values without the ';' char between them.
 	private static ArrayList<String> addComplianceGroupSeperately( String textContent) {
-
+		AppLogger.getLogger().fine("Begining of addComplianceGroupSeperately()");
 		ArrayList<String> seperatedComplianceValues = new ArrayList<String>();
 
 		if (! (textContent == null) ) {
@@ -417,11 +417,11 @@ public class FileManipulationService {
 	 * 
 	 */
 	private static String extractTableNameFromPath(String path) throws SecurityException, IOException {	
-		LoggerSingelton.getInstance().getLogger().info("extractTableNameFromPath");
+		AppLogger.getLogger().fine("extractTableNameFromPath");
 
 		Path p = Paths.get(path);
 		String file = p.getFileName().toString();
-		String filename = Files.getNameWithoutExtension(file);
+		String filename = com.google.common.io.Files.getNameWithoutExtension(file);
 		return filename;
 	}
 
@@ -433,7 +433,7 @@ public class FileManipulationService {
 	 * 
 	 */
 	private static void deleteFieldsFromPackageXml(String packageXmlFile, ArrayList<String> retrievedFieldNamesList) throws ParserConfigurationException, SAXException, IOException, TransformerException {
-		LoggerSingelton.getInstance().getLogger().info("Beginning of deleteFieldsFromPackageXml");
+		AppLogger.getLogger().info("Beginning of deleteFieldsFromPackageXml");
 
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -484,7 +484,7 @@ public class FileManipulationService {
 	 */
 	@SuppressWarnings("rawtypes")
 	private static ArrayList<String> findCategoriesForField(File baseDirectoy, String file, String field, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws IOException{
-		LoggerSingelton.getInstance().getLogger().info("Beginning of findCategoriesForField");
+		AppLogger.getLogger().fine("Beginning of findCategoriesForField");
 		for (Iterator iterator = bigIdColumnsToSynch.iterator(); iterator.hasNext();) {
 			ColumnToSynch currAttribue = (ColumnToSynch) iterator.next();	
 			String TableFullyQualifiedName = currAttribue.getTableFullyQualifiedName();
@@ -505,7 +505,7 @@ public class FileManipulationService {
 	 * 
 	 */
 	private static String extractFullPathChars(File baseDirectoy, String file) throws IOException {
-		//LoggerSingelton.getInstance().getLogger().info("Beginning of extractFullPathChars");
+		AppLogger.getLogger().fine("Beginning of extractFullPathChars");
 		File f = new File(file);
 		File directoryToZip = f.getParentFile();
 		// we want the zipEntry's path to be a relative path that is relative
@@ -590,11 +590,5 @@ public class FileManipulationService {
 		return columnsAndComplianceGroups;
 	}
 
-	// Get resource directory from everywhere in the project
-	public static String getResourceDirectory() {
-		Path resourceDirectory = Paths.get("src","main","resources");	
-		String absolutePath = resourceDirectory.toAbsolutePath().toString();
-		return absolutePath;
-	}
 }
 

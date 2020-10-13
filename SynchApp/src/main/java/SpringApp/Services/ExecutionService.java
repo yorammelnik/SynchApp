@@ -1,14 +1,10 @@
 package SpringApp.Services;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.bigid.appinfra.appinfrastructure.DTO.ExecutionContext;
-import com.bigid.appinfra.appinfrastructure.DTO.ParamDetails;
 import com.bigid.appinfra.appinfrastructure.ExternalConnections.BigIDProxy;
 import com.bigid.appinfra.appinfrastructure.Services.AbstractExecutionService;
 

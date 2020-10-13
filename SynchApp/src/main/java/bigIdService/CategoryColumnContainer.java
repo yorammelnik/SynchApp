@@ -20,7 +20,19 @@ public class CategoryColumnContainer {
 		}
 		return false;
 	}
-
+	
+	public CategoryColumnContainer() {
+		
+	}
+	
+	public CategoryColumnContainer(String columnName , String tableName , ArrayList<String> categories) {
+		
+		this.tableName = tableName;
+		columnNames = new ArrayList<String>();
+		columnNames.add(columnName);
+		this.categories = categories;
+		
+	}
 
 	/**
 	 * @return the categories
