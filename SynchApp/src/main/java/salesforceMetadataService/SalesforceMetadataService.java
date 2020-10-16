@@ -27,7 +27,6 @@ import com.sforce.ws.ConnectionException;
 
 import SpringApp.Controllers.AppLogger;
 import appController.FileManipulationService;
-import appController.LoggerSingeltonnnnn;
 import bigIdService.CategoryColumnContainer;
 import bigIdService.ColumnToSynch;
 import net.lingala.zip4j.exception.ZipException;

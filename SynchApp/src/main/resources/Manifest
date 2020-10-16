@@ -1,6 +1,6 @@
 {
-  "app_name": "BigId & Salesforce App",
-  "description": "Synch application for Synching BigId & Salesforce categories",
+  "app_name": "Salesforce Metadata Enrichment",
+  "description": "Application for Synching BigId & Salesforce categories",
   "category": "privacy",
   "license_type":"PAID",
   "vendor": "YoYa LLC",
@@ -10,101 +10,100 @@
   ],
   "actions": [      
     {
-      "action_id": "SynchBigIdSalesforceCategories",
-      "description": "Run the synch application",
+      "action_id": "Synch",
+      "description": "Run category synchronization between BigId and Salesforce",
       "is_sync": false,
-      "action_params": [			
+      "action_params": [	
 			{
-			"param_name": "LogLevel" ,
-			"param_type": "String" ,
-			"is_cleartext": true ,
-			"param_description": "LogLevel for the synch application" ,
-			"default_value": "info" ,
-			"param_priority": "primary" ,
+			"param_name": "Synch BigId category list to Salesforce",
+			"param_type": "String",
+			"is_cleartext": true,
+			"param_description": "A flag for deciding if categories from BigId should be synched to Salesorce.",
+			"default_value": "true",
+			"param_priority": "primary",
 			"is_mandatory": true
 			},
 			{
-			"param_name": "SYNCH_CATEGORY_TO_SALESFORCE" ,
-			"param_type": "String" ,
-			"is_cleartext": true ,
-			"param_description": "A flag for deciding if categories from BigId should be synched to Salesorce." ,
-			"default_value": "true" ,
-			"param_priority": "primary" ,
+			"param_name": "Synch Salesforce categories to BigId Correlation set fields",
+			"param_type": "String",
+			"is_cleartext": true,
+			"param_description": "A flag to decide if complianceGroup added manually in Salesforce should be synched to correlationSet fields in BigId.",
+			"default_value": "true",
+			"param_priority": "primary",
 			"is_mandatory": true
 			},
 			{
-			"param_name": "OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID" ,
-			"param_type": "String" ,
-			"is_cleartext": true ,
-			"param_description": "A flag for deciding if the update from BigId will overwrite or append categories to Saleforce complianceGroup filelds." ,
-			"default_value": "false" ,
-			"param_priority": "primary" ,
-			"is_mandatory": true
-			},
-			{
-			"param_name": "BYPASS_SSL_CERTIFICATE" ,
-			"param_type": "String" ,
-			"is_cleartext": true ,
-			"param_description": "A flag to bypass the need for ssl in development." ,
-			"default_value": "false" ,
-			"param_priority": "primary" ,
+			"param_name": "Overwrite Salesforce with BigId categories.",
+			"param_type": "String",
+			"is_cleartext": true,
+			"param_description": "A flag for deciding if the update from BigId will overwrite or append categories to Saleforce complianceGroup filelds.",
+			"default_value": "false",
+			"param_priority": "primary",
 			"is_mandatory": true
 			},			
 			{
-			"param_name": "Salesforce_url" ,
-			"param_type": "String" ,
-			"is_cleartext": true ,
-			"param_description": "Salesforce endpoint url" ,
-			"default_value": "https://login.salesforce.com/services/Soap/c/49.0" ,
-			"param_priority": "primary" ,
+			"param_name": "Apply BigId categories to Salesforce.",
+			"param_type": "String",
+			"is_cleartext": true,
+			"param_description": "A flag to decide if categories in BigId should be applied as complianceGroup values to fields in Salesforce.",
+			"default_value": "true",
+			"param_priority": "primary",
+			"is_mandatory": true
+			},		
+			{
+			"param_name": "Salesforce url",
+			"param_type": "String",
+			"is_cleartext": true,
+			"param_description": "Salesforce endpoint url",
+			"default_value": "https://login.salesforce.com/services/Soap/c/49.0",
+			"param_priority": "primary",
 			"is_mandatory": true
 			},
 			{
-			"param_name": "Salesforce_username" ,
-			"param_type": "String" ,
-			"is_cleartext": false ,
-			"param_description": "Salesforce username" ,
-			"default_value": "yorammelnik@gmail.com" ,
-			"param_priority": "primary" ,
+			"param_name": "Salesforce username",
+			"param_type": "String",
+			"is_cleartext": false,
+			"param_description": "Salesforce username",
+			"default_value": "yorammelnik@gmail.com",
+			"param_priority": "primary",
 			"is_mandatory": true
 			},
 			{
-			"param_name": "Salesforce_password" ,
-			"param_type": "String" ,
-			"is_cleartext": false ,
-			"param_description": "Salesforce password" ,
-			"default_value": "Yoya2021" ,
-			"param_priority": "primary" ,
+			"param_name": "Salesforce password",
+			"param_type": "String",
+			"is_cleartext": false,
+			"param_description": "Salesforce password",
+			"default_value": "Yoya2021",
+			"param_priority": "primary",
 			"is_mandatory": true
 			},
 			{
-			"param_name": "Salesforce_token" ,
-			"param_type": "String" ,
-			"is_cleartext": false ,
-			"param_description": "Salesforce token retrieved from Admin pages in Salesforce" ,
-			"default_value": "6BS8UStPYgI4NyhRPWcYQLJT" ,
-			"param_priority": "primary" ,
+			"param_name": "Salesforce token",
+			"param_type": "String",
+			"is_cleartext": false,
+			"param_description": "Salesforce token retrieved from Admin pages in Salesforce",
+			"default_value": "6BS8UStPYgI4NyhRPWcYQLJT",
+			"param_priority": "primary",
+			"is_mandatory": true
+			},			
+			{
+			"param_name": "Log Level",
+			"param_type": "String",
+			"is_cleartext": true,
+			"param_description": "Log level of the application",
+			"default_value": "info",
+			"param_priority": "primary",
 			"is_mandatory": true
 			},
 			{
-			"param_name": "SYNCH_COMPLIANCE_GROUP_FROM_SALESFORCE" ,
-			"param_type": "String" ,
-			"is_cleartext": true ,
-			"param_description": "A flag to decide if complianceGroup added manually in Salesforce should be synched to correlationSet fields in BigId." ,
-			"default_value": "true" ,
-			"param_priority": "primary" ,
+			"param_name": "Bypass SSL certificate",
+			"param_type": "String",
+			"is_cleartext": true,
+			"param_description": "A flag to bypass the need for ssl in development.",
+			"default_value": "false",
+			"param_priority": "primary",
 			"is_mandatory": true
-			},
-			{
-			"param_name": "APPLY_BIGID_CATEGORIES_TO_SALESFORCE" ,
-			"param_type": "String" ,
-			"is_cleartext": true ,
-			"param_description": "A flag to decide if categories in BigId should be applied as complianceGroup values to fields in Salesforce." ,
-			"default_value": "true" ,
-			"param_priority": "primary" ,
-			"is_mandatory": true
-			}
-			
+			}			
 		]
     }
   ]

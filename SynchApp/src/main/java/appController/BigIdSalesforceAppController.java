@@ -30,11 +30,14 @@ import salesforceMetadataService.SalesforceMetadataService;
 
 /*
  * @ Author: Yoram Melnik
- * Description: A class that manages the connection and synchronization of complianceGroup metadata fields between BigId and Salesforce 
+ * 
+ * Description: A class that manages the connection and synchronization of categories between BigId and Salesforce.
  * The class contains the main method for initiating the app.
  * This class can be "launched" in 2 ways:
- * 1. Launched from ide "run configuration" and then the configuration.xml file is used to initialize all data members.
+ * 1. Launched from ide "run configuration" and then the configuration.xml file is used to initialize all data members. Rarely used. Maninly for develop and debug.
  * 2. Launched from BigId as an application using the application framework. Data members are set via executionContext received from BigId action.
+ * 
+ * ** See appController() comments for explaining the main functionality of the class. **
  * 
  */
 
@@ -111,25 +114,27 @@ public class BigIdSalesforceAppController {
 
 	public void setContextActionParams(@RequestBody ExecutionContext executionContext) throws SecurityException, IOException {
 		AppLogger.getLogger().info("Beginning of setContextActionParams()");
-
-		String[] args = list2Array(executionContext.getActionParams());
-
-		AppLogger.setLogLevel(args[0]);	
-		this.SYNCH_CATEGORY_TO_SALESFORCE = Boolean.valueOf(args[1]);
-		this.OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID = Boolean.valueOf(args[2]);
-		this.BYPASS_SSL_CERTIFICATE = Boolean.valueOf(args[3]);
+		
 		this.BigId_url = executionContext.getBigidBaseUrl().substring (0, (executionContext.getBigidBaseUrl().length()-8));
 		this.BigId_Token = executionContext.getBigidToken();
-		// Username and password are for running the app from eclipse and therefore a connection to BigId should be established
+		// BigId Username and password are for running the app from eclipse and therefore a connection to BigId should be established
 		this.BigId_userName = null;
 		this.BigId_password = null;
+		
+		String[] args = list2Array(executionContext.getActionParams());		
+			
+		this.SYNCH_CATEGORY_TO_SALESFORCE = Boolean.valueOf(args[0]);
+		this.APPLY_SALESFORCE_CATEGORIES_TO_CORRELATION_SETS = Boolean.valueOf(args[1]);
+		this.OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID = Boolean.valueOf(args[2]);		
+		this.APPLY_BIGID_CATEGORIES_TO_SALESFORCE = Boolean.valueOf(args[3]);
 		this.Salesforce_url = args[4];
 		this.Salesforce_username = args[5];
 		this.Salesforce_password = args[6];
-		this.Salesforce_token = args[7];
-		this.APPLY_SALESFORCE_CATEGORIES_TO_CORRELATION_SETS = Boolean.valueOf(args[8]);
-		this.APPLY_BIGID_CATEGORIES_TO_SALESFORCE = Boolean.valueOf(args[9]);
-
+		this.Salesforce_token = args[7];		
+		AppLogger.setLogLevel(args[8]);
+		this.BYPASS_SSL_CERTIFICATE = Boolean.valueOf(args[9]);
+		
+		// Flag that there is no need to retrieve parameters from the configuration.xml
 		APP_INITIATED_FROM_BIGID = true;
 
 	}
@@ -148,6 +153,17 @@ public class BigIdSalesforceAppController {
 	}
 
 	/**
+	 * The main method of the class that handles the flow of the App. 
+	 * 
+	 * Main flow of the app:
+	 * 
+	 * 1. Initiate a connection to Salesforce. Connection to BigId is being initiated only if the class is NOT launched from BigId.
+	 * 2. Get category list from BigId and ComplianceGroup list from Salesforce.
+	 * 3. Set new complianceGroup values from Salesforce as categories in BigId.
+	 * 4. Set BigID new categories as complianceGroup metadata in the Salesforce complianceGoup list if SYNCH_CATEGORY_TO_SALESFORCE is true.
+	 * 5. Get complianceGroup values from fields in Salesforce and set them in fields of relevant correlation sets in BigId if APPLY_SALESFORCE_CATEGORIES_TO_CORRELATION_SETS is true.
+	 * 6. Set categories from BigId as complianceGroup metadata into the equivalent fields in Salesforce.
+	 * 
 	 * @param salesforce_token the salesforce_token to set
 	 * @return the salesforce_token
 	 * @throws IOException 

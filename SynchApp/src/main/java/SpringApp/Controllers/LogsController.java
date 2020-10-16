@@ -8,8 +8,6 @@ import org.springframework.stereotype.Controller;
 
 import com.bigid.appinfra.appinfrastructure.Controllers.AbstractLoggingController;
 
-import appController.LoggerSingeltonnnnn;
-
 @Controller
 public class LogsController implements AbstractLoggingController {
 
@@ -25,7 +23,7 @@ public class LogsController implements AbstractLoggingController {
 			PrintWriter pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
 			try {
-				LoggerSingeltonnnnn.getInstance().severe("error log Stack trace:"+ sw.toString());
+				AppLogger.getLogger().severe("error log Stack trace:"+ sw.toString());
 			} catch (Exception e1) {				
 				e1.printStackTrace();
 			}			

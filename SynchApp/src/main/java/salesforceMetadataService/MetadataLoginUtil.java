@@ -8,7 +8,6 @@ import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 
 import SpringApp.Controllers.AppLogger;
-import appController.LoggerSingeltonnnnn;
 
 /**
  * Salesforce Metadata Api Login utility.

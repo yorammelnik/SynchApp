@@ -19,7 +19,6 @@ import com.sforce.soap.metadata.RunTestsResult;
 import com.sforce.ws.ConnectionException;
 
 import SpringApp.Controllers.AppLogger;
-import appController.LoggerSingeltonnnnn;
 
 /**
  * Deploy a zip file of metadata components. 

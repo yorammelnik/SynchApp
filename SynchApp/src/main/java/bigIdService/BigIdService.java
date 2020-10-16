@@ -27,9 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import SpringApp.Controllers.AppLogger;
-import appController.LoggerSingeltonnnnn;
 import appController.ResponseNotOKException;
-import ch.qos.logback.classic.net.LoggingEventPreSerializationTransformer;
 
 /*
  * @ Author: Yoram Melnik
@@ -126,8 +124,11 @@ public class BigIdService {
 		AppLogger.getLogger().info("Beginning of postConnect()");
 
 
-		// Set user name and password 
-		JSONObject jsonPostObject = new JSONObject( "{\"password\":" + "\"" + PASSWORD + "\"," + "\"username\":" + "\"" + USER_NAME + "\"}" );
+		// Set user name and password 		
+		JSONObject jsonPostObject = new JSONObject();
+		jsonPostObject.put("password", PASSWORD);
+		jsonPostObject.put("username", USER_NAME);
+
 		String loginUrl = URL + API + VERSION + SESSIONS;
 
 		HttpPost httpPostRequest = new HttpPost(loginUrl);		
@@ -184,7 +185,7 @@ public class BigIdService {
 
 		String result = EntityUtils.toString(response.getEntity());
 
-		AppLogger.getLogger().fine("result string for uri: " + uri + ":" + result);
+		AppLogger.getLogger().finer("result string for uri: " + uri + ":" + result);
 
 		// Set the results into a JSONArray. An array is used because there may be more that on category 
 		JSONArray categories  = new JSONArray(result);
@@ -227,7 +228,12 @@ public class BigIdService {
 			AppLogger.getLogger().fine("postNewCategories. currCategory = " + currCategory);
 
 			LocalDateTime today = LocalDateTime.now();
-			JSONObject jsonPostObject = new JSONObject( "{\"unique_name\":" + "\"" + currCategory + "\"," + "\"description\":" + "\"Imported from Salesforce on - " + today +  "\"," + "\"display_name\":" + "\"" + currCategory + "\"," + "\"color\":" + "\""  + "\"}" );
+			//JSONObject jsonPostObject = new JSONObject( "{\"unique_name\":" + "\"" + currCategory + "\"," + "\"description\":" + "\"Imported from Salesforce on - " + today +  "\"," + "\"display_name\":" + "\"" + currCategory + "\"," + "\"color\":" + "\""  + "\"}" );
+			JSONObject jsonPostObject = new JSONObject();
+			jsonPostObject.put("unique_name", currCategory);
+			jsonPostObject.put("description", "Imported from Salesforce on" + ": " + today);
+			jsonPostObject.put("display_name", currCategory);
+			jsonPostObject.put("color", "");
 
 			StringEntity params = new StringEntity(jsonPostObject.toString());
 			httpPostRequest.setEntity(params);
@@ -300,8 +306,7 @@ public class BigIdService {
 			AppLogger.getLogger().fine("IN getObjectsToSynch, currentSFOjbect is: " + currentSFOjbect.toString());
 
 			JSONObject data = currentSFOjbect.getJSONObject("data");
-			JSONArray columns = data.getJSONArray("results");
-			//JSONArray columns = currentSFOjbect.getJSONArray("data");
+			JSONArray columns = data.getJSONArray("results");		
 
 			for (int k = 0; k < columns.length(); k++) {
 
@@ -937,13 +942,13 @@ public class BigIdService {
 			ArrayList<String> complianceGroupValues = complianceGroupToUpdate.get(i).getCategories();
 
 			if (! complianceGroupValues.isEmpty()) {
-				
+
 				ArrayList<JSONObject> previousCategories = getPreviousCategories(complianceGroupToUpdate.get(i).getColumnNames().get(0));
 				for(int k = 0; k < previousCategories.size(); k++) {
 					String currC = previousCategories.get(k).getString("display_name");
 					complianceGroupValues.remove(currC);
 				}				
-				
+
 				for (int j = 0; j < complianceGroupValues.size(); j++) {
 
 					// There is only 1 column in a CategoryColumnContainer so just get the first and only one.
@@ -962,7 +967,7 @@ public class BigIdService {
 					httpPostRequest.setHeader("Content-type", "application/json");					
 
 					AppLogger.getLogger().fine("postNewCategories. currCategory = " + newCategory);						
-					
+
 					JSONObject jsonPostObject = new JSONObject();
 					jsonPostObject.put("original_name", column);
 					jsonPostObject.putOpt("glossary_id", null);
@@ -998,7 +1003,7 @@ public class BigIdService {
 		}	
 	}
 
-	
+
 	/**	 
 	 * A helper method to get the unique_name of a specific category
 	 * 
@@ -1032,9 +1037,8 @@ public class BigIdService {
 
 		String result = EntityUtils.toString(response.getEntity());
 
-		//AppLogger.getLogger().info("result string for uri: " + uri + ":" + result);
+		AppLogger.getLogger().finer("result string for uri: " + uri + ":" + result);
 
-		String categoriesString = "";
 		ArrayList<JSONObject> previousCategories = new ArrayList<JSONObject>();
 
 		// Go down the Jsonobject hierarchy until reaching the list of attributes and their categories.
@@ -1050,9 +1054,8 @@ public class BigIdService {
 				// There could be attributes that do not have a category or categories
 				if (! idsor_attributes.getJSONObject(i).isNull("categories")) {
 					JSONArray categories = idsor_attributes.getJSONObject(i).getJSONArray("categories");					
-					for (int k = 0; k < categories.length(); k++) {
-						// TODO temporary fix for dealing with garbage categories that are not displayed. 
-						// Only if there is a display_name than copy them to categoriesString
+					for (int k = 0; k < categories.length(); k++) {									
+						// Only if there is a display_name than copy them to categoriesString						
 						if (! categories.getJSONObject(k).isNull("display_name") ) {
 							JSONObject currCategory = new JSONObject();
 							currCategory.put("_id", categories.getJSONObject(k).getString("unique_name"));

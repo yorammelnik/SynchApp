@@ -33,7 +33,7 @@ public class ExecutionController extends AbstractExecutionController{
 		
 
 		switch (action) {            
-		case("SynchBigIdSalesforceCategories"):
+		case("Synch"):
 			boolean sucess = ((ExecutionService)executionService).Synch(executionContext);
 		if (sucess) {
 			return generateSyncSuccessMessage(executionId, "The action completed sucessfully");

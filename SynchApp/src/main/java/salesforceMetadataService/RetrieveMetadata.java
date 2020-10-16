@@ -28,8 +28,6 @@ import com.sforce.soap.metadata.RetrieveStatus;
 import com.sforce.ws.ConnectionException;
 
 import SpringApp.Controllers.AppLogger;
-import appController.FileManipulationService;
-import appController.LoggerSingeltonnnnn;
 import bigIdService.ColumnToSynch;
 
 
