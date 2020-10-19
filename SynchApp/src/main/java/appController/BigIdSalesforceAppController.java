@@ -318,7 +318,7 @@ public class BigIdSalesforceAppController {
 	 * 
 	 */
 	private void addCategoriesToSalesforce() throws ConnectionException, SecurityException, IOException {		
-		AppLogger.getLogger().info("Beginning of addMetadataCateoriesToSalesforce()");
+		AppLogger.getLogger().info("Beginning of addCategoriesToSalesforce()");
 
 		// get new BigId categories that are not in Salesforce and call addNewMetadataValue if there are new categories
 		ArrayList<String> newCategories = findNewCategoryItemsFromBigId();

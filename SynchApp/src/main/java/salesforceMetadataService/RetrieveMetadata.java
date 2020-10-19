@@ -63,7 +63,7 @@ public class RetrieveMetadata {
 	 */
 	public File retrieveZip(ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws RemoteException, Exception
 	{
-		AppLogger.getLogger().info("Beginning of retrieveZipFile()");
+		AppLogger.getLogger().info("Beginning of retrieveZip()");
 
 		RetrieveRequest retrieveRequest = new RetrieveRequest();
 		// The version in package.xml overrides the version in RetrieveRequest
@@ -116,10 +116,10 @@ public class RetrieveMetadata {
 			ByteArrayInputStream bais = new ByteArrayInputStream(result.getZipFile());				
 			
 			String path = SalesforceMetadataService.getTempDirectory();
-			AppLogger.getLogger().info("Line 120. String path: " + path);
+			AppLogger.getLogger().fine("Line 120. String path: " + path);
 			
 			Path resultFilePath = Paths.get(path, SalesforceMetadataService.getRetrieveResultFile());			
-			AppLogger.getLogger().info("Line 122. Path resultFilePath: " + resultFilePath.toAbsolutePath().toString());
+			AppLogger.getLogger().fine("Line 122. Path resultFilePath: " + resultFilePath.toAbsolutePath().toString());
 						
 			FileOutputStream os = new FileOutputStream(resultFilePath.toAbsolutePath().toString());
 			

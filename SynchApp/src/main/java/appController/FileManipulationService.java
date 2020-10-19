@@ -222,7 +222,7 @@ public class FileManipulationService {
 
 		zip.addFolder(new File(directoryToZip), parameters);		
 
-		AppLogger.getLogger().fine("In zip(). New zip file:");
+		AppLogger.getLogger().fine("In zip(). New zip file: " + zip.toString());
 
 	}
 

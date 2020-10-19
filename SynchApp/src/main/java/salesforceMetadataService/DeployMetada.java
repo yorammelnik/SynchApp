@@ -107,7 +107,7 @@ public class DeployMetada {
     private byte[] readZipFile()
         throws Exception
     {
-    	AppLogger.getLogger().info("Beginning of readZipFile");
+    	AppLogger.getLogger().info("Beginning of readZipFile()");
         // We assume here that you have a deploy.zip file.
         // See the retrieve sample for how to retrieve a zip file.
         File deployZip = new File(ZIP_FILE);

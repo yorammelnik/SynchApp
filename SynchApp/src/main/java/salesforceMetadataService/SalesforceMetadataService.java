@@ -70,7 +70,7 @@ public class SalesforceMetadataService {
 
 	// Use MetadateUtil class to connect to Salesforce and return a metadata connection
 	public void connect(String url, String userName, String password, String token) throws ConnectionException, SecurityException, IOException  {
-		AppLogger.getLogger().fine("Beginning of connect() {}");
+		AppLogger.getLogger().fine("Beginning of connect()");
 		metadataConnection = MetadataLoginUtil.login( url,  userName,  password,  token);	
 
 		// If the connection fails an exception will porpagate all the way back to main method
@@ -121,7 +121,7 @@ public class SalesforceMetadataService {
 			container.setCurrentSet(currSet);
 		} 
 		else { // Empty metadata
-			AppLogger.getLogger().warning("In getMedatadataValue(). Metadata type");
+			AppLogger.getLogger().warning("In getMedatadataValue(). Metadata type mdInfo[0] is null");
 		}
 
 		return container;
@@ -166,7 +166,7 @@ public class SalesforceMetadataService {
 
 		@SuppressWarnings("unused")
 		UpsertResult[] results = metadataConnection.upsertMetadata(new Metadata[] { newSet });
-		AppLogger.getLogger().info("Inserting {} new metadata complianceGroup values to Salesforce");
+		AppLogger.getLogger().fine("In addNewMetadataValue(). Inserting new metadata complianceGroup values to Salesforce: " + newSet.toString());
 
 		//  If the updateMetadata fails an exception will porpagate all the way back to main method		
 	}
@@ -227,7 +227,7 @@ public class SalesforceMetadataService {
 	 * 
 	 */
 	public ArrayList<CategoryColumnContainer> retrieveCorrelationSetColumnsFromSalesforce(ArrayList<ColumnToSynch> columns) throws Exception {
-		AppLogger.getLogger().info("Beginning of retrieveCorrelationSetColumns()");
+		AppLogger.getLogger().info("Beginning of retrieveCorrelationSetColumnsFromSalesforce()");
 
 		RetrieveMetadata ret = new RetrieveMetadata(metadataConnection);
 		File retrieveResult = ret.retrieveZip(columns);

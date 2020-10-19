@@ -357,7 +357,7 @@ public class BigIdService {
 	 */
 	private void dealWithSalesforceComplexFields(ArrayList<ColumnToSynch> columnsToSynch) throws SecurityException, IOException {
 
-		AppLogger.getLogger().info("Begining of dealWithSalesforceComplexFields");
+		AppLogger.getLogger().info("Begining of dealWithSalesforceComplexFields()");
 
 		ArrayList<ColumnToSynch> addressColumnsToDealWith = new ArrayList<ColumnToSynch>();
 		ArrayList<ColumnToSynch> addressColumnsToRemove = new ArrayList<ColumnToSynch>();
@@ -432,7 +432,7 @@ public class BigIdService {
 	 * 
 	 */
 	private ArrayList<String> getCategoriesForColumn(String currObject, ArrayList categoryAndColumnList, String column) throws SecurityException, IOException {
-		AppLogger.getLogger().fine("Begining of getCategoriesForColumn");
+		AppLogger.getLogger().fine("Begining of getCategoriesForColumn()");
 
 		ArrayList<String> categoriesFound = new ArrayList<String>();
 		for (Iterator iterator = categoryAndColumnList.iterator(); iterator.hasNext();) {
@@ -462,7 +462,7 @@ public class BigIdService {
 	 * 
 	 */
 	private ArrayList<CategoryColumnContainer> getCategoriesAndColumns(ArrayList<JSONObject> salesforceRelatedObjects) throws ParseException, ResponseNotOKException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-		AppLogger.getLogger().fine("Begining of getCategoriesAndColumns");
+		AppLogger.getLogger().fine("Begining of getCategoriesAndColumns()");
 
 		ArrayList<CategoryColumnContainer> categoriesAndColumsFound = new ArrayList<CategoryColumnContainer>();
 
@@ -471,7 +471,7 @@ public class BigIdService {
 
 			// set a query to retrieve the attributes of the object			
 			String uri = URL + API + VERSION +"/data-catalog/object-details/attributes?object_name=" + objectToSynch.getString("fullyQualifiedName");
-			AppLogger.getLogger().fine("IN getObjectsToSynch, uri is: " + uri);
+			AppLogger.getLogger().fine("IN getCategoriesAndColumns(), uri is: " + uri);
 
 			HttpGet getRequest = new HttpGet(uri);
 			getRequest.setHeader("Authorization", TOKEN);
@@ -487,7 +487,7 @@ public class BigIdService {
 			proccessHttpResponse(response, uri);
 
 			JSONObject currentSFOjbect = new JSONObject(EntityUtils.toString(response.getEntity()));
-			AppLogger.getLogger().fine("IN getObjectsToSynch, currentSFOjbect is " + currentSFOjbect.toString());
+			AppLogger.getLogger().fine("IN getCategoriesAndColumns(), currentSFOjbect is " + currentSFOjbect.toString());
 
 			JSONArray data = (JSONArray) currentSFOjbect.get("data");
 
@@ -572,7 +572,7 @@ public class BigIdService {
 
 		createClient();
 		HttpResponse response = client.execute(getRequest);
-		AppLogger.getLogger().fine("IN getSalesforceObjectsFromDb, Status code is " + response.getStatusLine().getStatusCode() + " response is " + response.toString());
+		AppLogger.getLogger().fine("In getSalesforceObjectsFromDb, Status code is " + response.getStatusLine().getStatusCode() + " response is " + response.toString());
 
 		proccessHttpResponse(response, uri);
 
@@ -591,7 +591,7 @@ public class BigIdService {
 				salesforceObjects.add(currentJson);						
 			}
 		}
-		AppLogger.getLogger().fine("salesforceObjects to write: " + salesforceObjects.toString() );
+		AppLogger.getLogger().fine("In getSalesforceObjectsFromDb, salesforceObjects to write: " + salesforceObjects.toString() );
 		return salesforceObjects;
 	}
 
@@ -609,7 +609,7 @@ public class BigIdService {
 		if (statusCode == 200) {
 		}
 		else {
-			AppLogger.getLogger().severe("Response code for uri" + uri + "is " + statusCode + " response, reasonPhrase:" + response.getStatusLine().getReasonPhrase());
+			AppLogger.getLogger().severe("In proccessHttpResponse(), Response code for uri" + uri + "is " + statusCode + " response, reasonPhrase:" + response.getStatusLine().getReasonPhrase());
 			throw new ResponseNotOKException("Response code for uri " + uri + " is" +  statusCode);
 		}
 	}
@@ -627,7 +627,7 @@ public class BigIdService {
 	 * 
 	 */
 	public ArrayList<ColumnToSynch> getColumnsFromCorrelationsets() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, SecurityException, IOException, ParseException, ResponseNotOKException {
-		AppLogger.getLogger().info("Beginning of BigIdService.getColumnsFromCorrelationsets() {}");
+		AppLogger.getLogger().info("Beginning of getColumnsFromCorrelationsets() {}");
 
 		// https://yoram4.westeurope.cloudapp.azure.com/api/v1/id_connections
 		String uri = URL + API + VERSION + ID_CONNECTIOS;
@@ -647,7 +647,7 @@ public class BigIdService {
 
 		String result = EntityUtils.toString(response.getEntity());
 
-		AppLogger.getLogger().fine("result string for uri: " + uri + ":" + result);
+		AppLogger.getLogger().fine("In getColumnsFromCorrelationsets(), result string for uri: " + uri + ":" + result);
 
 		// Set the results into a JSONArray.  
 		JSONArray correlationSets  = new JSONObject(result).getJSONArray("id_connections");
@@ -966,7 +966,7 @@ public class BigIdService {
 					httpPostRequest.setHeader("Accept", "application/json");
 					httpPostRequest.setHeader("Content-type", "application/json");					
 
-					AppLogger.getLogger().fine("postNewCategories. currCategory = " + newCategory);						
+					AppLogger.getLogger().fine("In updateCorrelationSetWithComplianceGroup(), postNewCategories. currCategory = " + newCategory);						
 
 					JSONObject jsonPostObject = new JSONObject();
 					jsonPostObject.put("original_name", column);
@@ -983,7 +983,7 @@ public class BigIdService {
 					jsonPostObject.put("categories", previousCategories);	
 					JSONArray jsonPostArray = new JSONArray().put(jsonPostObject);
 
-					AppLogger.getLogger().fine("JsonObject when posting a new complianceGroup " + jsonPostObject.toString());
+					AppLogger.getLogger().fine("In updateCorrelationSetWithComplianceGroup(), JsonObject when posting a new complianceGroup " + jsonPostObject.toString());
 
 					StringEntity params = new StringEntity(jsonPostArray.toString());
 					httpPostRequest.setEntity(params);
@@ -995,7 +995,7 @@ public class BigIdService {
 					// create a new client for each iteration
 					createClient();			
 					HttpResponse response = client.execute(httpPostRequest);
-					AppLogger.getLogger().info("updateCorrelationSetWithComplianceGroup. After execute(). field: " + column + ", value: " + newCategory);
+					AppLogger.getLogger().info("In updateCorrelationSetWithComplianceGroup(), updateCorrelationSetWithComplianceGroup. After execute(). field: " + column + ", value: " + newCategory);
 
 					proccessHttpResponse(response, uri);
 				}
@@ -1037,7 +1037,7 @@ public class BigIdService {
 
 		String result = EntityUtils.toString(response.getEntity());
 
-		AppLogger.getLogger().finer("result string for uri: " + uri + ":" + result);
+		AppLogger.getLogger().finer("In getPreviousCategories(), result string for uri: " + uri + ":" + result);
 
 		ArrayList<JSONObject> previousCategories = new ArrayList<JSONObject>();
 
@@ -1108,7 +1108,7 @@ public class BigIdService {
 
 		String result = EntityUtils.toString(response.getEntity());
 
-		AppLogger.getLogger().fine("result string for uri: " + uri + ":" + result);
+		AppLogger.getLogger().fine("In getGlossary_id(), result string for uri: " + uri + ":" + result);
 
 		// Set the results into a JSONArray. An array is used because there may be more than one category 
 		JSONArray categories  = new JSONArray(result);
