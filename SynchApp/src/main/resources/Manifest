@@ -1,5 +1,5 @@
 {
-  "app_name": "Salesforce Metadata Enrichment",
+  "app_name": "Salesforce Data Classification",
   "description": "Application for Synching BigId & Salesforce categories",
   "category": "privacy",
   "license_type":"PAID",
@@ -10,12 +10,12 @@
   ],
   "actions": [      
     {
-      "action_id": "Synch",
+      "action_id": "Sync",
       "description": "Run category synchronization between BigId and Salesforce",
       "is_sync": false,
       "action_params": [	
 			{
-			"param_name": "Synch BigId category list to Salesforce",
+			"param_name": "Sync BigId category list to Salesforce",
 			"param_type": "String",
 			"is_cleartext": true,
 			"param_description": "A flag for deciding if categories from BigId should be synched to Salesorce.",
@@ -24,7 +24,7 @@
 			"is_mandatory": true
 			},
 			{
-			"param_name": "Synch Salesforce categories to BigId Correlation set fields",
+			"param_name": "Sync Salesforce categories to BigId Correlation set fields",
 			"param_type": "String",
 			"is_cleartext": true,
 			"param_description": "A flag to decide if complianceGroup added manually in Salesforce should be synched to correlationSet fields in BigId.",

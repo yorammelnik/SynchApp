@@ -68,7 +68,7 @@ public class BigIdSalesforceAppController {
 
 	// Salesforce metadata connection and attributes
 	private SalesforceMetadataService salesforceMetaConnectionService;// = new SalesforceMetadataService(); 
-	
+
 	private String Salesforce_url;
 	private String Salesforce_username;
 	private String Salesforce_password;
@@ -84,12 +84,12 @@ public class BigIdSalesforceAppController {
 	private String BigId_password;	
 
 	private BigIdService bigIdConnectionService;
-	
+
 	private ArrayList<String> SalesforceComplianceGroupValues = new ArrayList<String>();
 	private ArrayList<String> BigIdCategoryValues = new ArrayList<String>();
-	
+
 	private LoginData configurationXml = null;
-	
+
 	public static void main(String[] args) throws Exception {
 
 		// instantiate the BigIdSalesforceController and call for the appController
@@ -97,8 +97,8 @@ public class BigIdSalesforceAppController {
 		controller.appController();	
 
 	}	
-	
-	
+
+
 	public BigIdSalesforceAppController() throws IOException {	
 		salesforceMetaConnectionService = new SalesforceMetadataService();
 	}	
@@ -114,15 +114,15 @@ public class BigIdSalesforceAppController {
 
 	public void setContextActionParams(@RequestBody ExecutionContext executionContext) throws SecurityException, IOException {
 		AppLogger.getLogger().info("Beginning of setContextActionParams()");
-		
+
 		this.BigId_url = executionContext.getBigidBaseUrl().substring (0, (executionContext.getBigidBaseUrl().length()-8));
 		this.BigId_Token = executionContext.getBigidToken();
 		// BigId Username and password are for running the app from eclipse and therefore a connection to BigId should be established
 		this.BigId_userName = null;
 		this.BigId_password = null;
-		
+
 		String[] args = list2Array(executionContext.getActionParams());		
-			
+
 		this.SYNCH_CATEGORY_TO_SALESFORCE = Boolean.valueOf(args[0]);
 		this.APPLY_SALESFORCE_CATEGORIES_TO_CORRELATION_SETS = Boolean.valueOf(args[1]);
 		this.OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID = Boolean.valueOf(args[2]);		
@@ -133,7 +133,7 @@ public class BigIdSalesforceAppController {
 		this.Salesforce_token = args[7];		
 		AppLogger.setLogLevel(args[8]);
 		this.BYPASS_SSL_CERTIFICATE = Boolean.valueOf(args[9]);
-		
+
 		// Flag that there is no need to retrieve parameters from the configuration.xml
 		APP_INITIATED_FROM_BIGID = true;
 
@@ -231,15 +231,15 @@ public class BigIdSalesforceAppController {
 				AppLogger.getLogger().fine("After call to addCategoriesToSalesforce() and adding new categories to to Salesforce. SYNCH_CATEGORY_TO_SALESFORCE flag is" + SYNCH_CATEGORY_TO_SALESFORCE);
 			} 
 
-			// Retrieve from BigId all the "BigId Salesforce objects" that should be synched to Salesforce
-			ArrayList<ColumnToSynch> bigIdColumnsToSynch = bigIdConnectionService.getObjectsToSynch();
-			AppLogger.getLogger().fine("After bigIdConnectionService.getObjectsToSynch().");
-
 			// Get Salesforce complianceGroup values for fields chosen in correlation sets if they exist
 			if (APPLY_SALESFORCE_CATEGORIES_TO_CORRELATION_SETS) {
 				getComplianceGrupeValuesForCorrelationSetFields();
 				AppLogger.getLogger().fine("After bigIdConnectionService.getComplianceGrupeValuesForCorrelationSetFields().");
-			}			
+			}	
+
+			// Retrieve from BigId all the "BigId Salesforce objects" that should be synched to Salesforce
+			ArrayList<ColumnToSynch> bigIdColumnsToSynch = bigIdConnectionService.getObjectsToSynch();
+			AppLogger.getLogger().fine("After bigIdConnectionService.getObjectsToSynch().");
 
 			// Write BigId columns with their categories (is they exist) to Salesforce
 			if (APPLY_BIGID_CATEGORIES_TO_SALESFORCE) {							
