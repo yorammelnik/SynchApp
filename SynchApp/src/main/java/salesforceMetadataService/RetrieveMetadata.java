@@ -46,7 +46,7 @@ public class RetrieveMetadata {
 	// one second in milliseconds
 	private static final long ONE_SECOND = 1000;
 	// maximum number of attempts to retrieve the results
-	private static final int MAX_NUM_POLL_REQUESTS = 50; 
+	private static final int MAX_NUM_POLL_REQUESTS = 6; 
 
 	private static final Double API_VERSION = 47.0; 
 	private static final String API_VERSION_STRING = "47.0";

@@ -524,6 +524,8 @@ public class FileManipulationService {
 	 * 
 	 */
 	public static ArrayList<String> getFilesFromZipfile(File retrieveResult) throws IOException {
+		AppLogger.getLogger().info("Beginning of getFilesFromZipfile() file is: " + retrieveResult.toString());
+		
 		File parentDir = new File(retrieveResult.getAbsolutePath()).getParentFile();
 		ZipFile zipFile = new ZipFile(retrieveResult.getAbsolutePath());
 
@@ -540,7 +542,7 @@ public class FileManipulationService {
 	 * 
 	 */
 	public static ArrayList<CategoryColumnContainer> readComplianceGroupfieldAndValues(ArrayList<String> files) throws SAXException, IOException, ParserConfigurationException {
-
+		AppLogger.getLogger().info("Beginning of readComplianceGroupfieldAndValues()");
 		ArrayList<CategoryColumnContainer> columnsAndComplianceGroups = new ArrayList<CategoryColumnContainer>();
 
 		for (String file : files) {

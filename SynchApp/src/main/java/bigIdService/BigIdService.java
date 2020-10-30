@@ -304,9 +304,8 @@ public class BigIdService {
 
 			JSONObject currentSFOjbect = new JSONObject(EntityUtils.toString(response.getEntity()));
 			AppLogger.getLogger().fine("IN getObjectsToSynch, currentSFOjbect is: " + currentSFOjbect.toString());
-
-			JSONObject data = currentSFOjbect.getJSONObject("data");
-			JSONArray columns = data.getJSONArray("results");		
+			
+			JSONArray columns = currentSFOjbect.getJSONArray("data");
 
 			for (int k = 0; k < columns.length(); k++) {
 
@@ -627,7 +626,7 @@ public class BigIdService {
 	 * 
 	 */
 	public ArrayList<ColumnToSynch> getColumnsFromCorrelationsets() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, SecurityException, IOException, ParseException, ResponseNotOKException {
-		AppLogger.getLogger().info("Beginning of getColumnsFromCorrelationsets() {}");
+		AppLogger.getLogger().info("Beginning of getColumnsFromCorrelationsets()");
 
 		// https://yoram4.westeurope.cloudapp.azure.com/api/v1/id_connections
 		String uri = URL + API + VERSION + ID_CONNECTIOS;
@@ -930,7 +929,7 @@ public class BigIdService {
 	 * @throws ParseException 
 	 */
 	public void updateCorrelationSetWithComplianceGroup(ArrayList<CategoryColumnContainer> complianceGroupToUpdate) throws SecurityException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, ParseException, ResponseNotOKException {
-		AppLogger.getLogger().info("Beginning of BigIdService.updateCorrelationSetWithComplianceGroup() {}");
+		AppLogger.getLogger().info("Beginning of BigIdService.updateCorrelationSetWithComplianceGroup()");
 
 		// Deal with Salesforce complex fields: Address and Name
 		convertComplexField2Primitive(complianceGroupToUpdate);
@@ -942,13 +941,16 @@ public class BigIdService {
 			ArrayList<String> complianceGroupValues = complianceGroupToUpdate.get(i).getCategories();
 
 			if (! complianceGroupValues.isEmpty()) {
-
+				
+				// Remove from complianceGroupValues list all the categories that already exist
+				// There is only 1 column in a CategoryColumnContainer.columnNames list so just get the first and only one.
 				ArrayList<JSONObject> previousCategories = getPreviousCategories(complianceGroupToUpdate.get(i).getColumnNames().get(0));
 				for(int k = 0; k < previousCategories.size(); k++) {
 					String currC = previousCategories.get(k).getString("display_name");
 					complianceGroupValues.remove(currC);
 				}				
-
+				
+				// Iterate through the complianceGroupValues list that is holding new complianceGroup values only
 				for (int j = 0; j < complianceGroupValues.size(); j++) {
 
 					// There is only 1 column in a CategoryColumnContainer so just get the first and only one.
@@ -957,7 +959,7 @@ public class BigIdService {
 					// Get the category, the category's unique_name (glossay_id), and previous categories
 					String newCategory = complianceGroupValues.get(j);
 					String new_glossary_id = getGlossary_id(newCategory);
-					previousCategories = getPreviousCategories(column);
+					//previousCategories = getPreviousCategories(column);
 
 					String uri = URL + "/api/v1/attributes";
 

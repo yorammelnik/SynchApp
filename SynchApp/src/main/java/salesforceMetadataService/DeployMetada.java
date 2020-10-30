@@ -36,7 +36,7 @@ public class DeployMetada {
     // one second in milliseconds
     private static final long ONE_SECOND = 1000;
     // maximum number of attempts to deploy the zip file
-    private static final int MAX_NUM_POLL_REQUESTS = 50; 
+    private static final int MAX_NUM_POLL_REQUESTS = 6; 
 
         
     public DeployMetada(String retrieveZipFilePath, MetadataConnection metadataConnection) 
