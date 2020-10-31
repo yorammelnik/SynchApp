@@ -19,7 +19,7 @@ public class ExecutionService extends AbstractExecutionService {
 		super(bigIDProxy);
 	}
 
-	public boolean Synch(@RequestBody ExecutionContext executionContext){
+	public ActionResult Synch(@RequestBody ExecutionContext executionContext){
 		try {
 
 			// start synch app with the params sent from BigId
@@ -29,12 +29,12 @@ public class ExecutionService extends AbstractExecutionService {
 
 		} catch (ReturnFalseIndicationExceptionToBigId e) {
 			e.printStackTrace();
-			return false;
+			return new ActionResult(false, e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
-			return false;
+			return new ActionResult(false, e.getMessage());
 		}
-		return true;
+		return new ActionResult(true, "");
 	}   
 
 }

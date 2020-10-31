@@ -46,12 +46,12 @@ public class RetrieveMetadata {
 	// one second in milliseconds
 	private static final long ONE_SECOND = 1000;
 	// maximum number of attempts to retrieve the results
-	private static final int MAX_NUM_POLL_REQUESTS = 6; 
+	private static final int MAX_NUM_POLL_REQUESTS = 10; 
 
 	private static final Double API_VERSION = 47.0; 
 	private static final String API_VERSION_STRING = "47.0";
 	private ArrayList<RetrieveMessage> retrieveWarnings = new ArrayList<RetrieveMessage>();
-	
+
 	public RetrieveMetadata(MetadataConnection metadataConnection) 
 			throws ConnectionException {
 		this.metadataConnection = metadataConnection;
@@ -82,11 +82,12 @@ public class RetrieveMetadata {
 		do {
 			Thread.sleep(waitTimeMilliSecs);
 			// Double the wait time for the next iteration
-			waitTimeMilliSecs *= 2;
+			waitTimeMilliSecs += 1;
 			if (poll++ > MAX_NUM_POLL_REQUESTS) {
-				throw new Exception("Request timed out.  If this is a large set " +
-						"of metadata components, check that the time allowed " +
-						"by MAX_NUM_POLL_REQUESTS is sufficient.");
+				AppLogger.getLogger().severe("Request timed out. If this is a large set " +
+                "of metadata components, check that the time allowed by " +
+                "MAX_NUM_POLL_REQUESTS is sufficient.");				
+				throw new Exception("The request in Salesforce timed out.");
 			}
 			result = metadataConnection.checkRetrieveStatus(
 					asyncResultId, true);
@@ -108,27 +109,27 @@ public class RetrieveMetadata {
 			}
 			if (buf.length() > 0) {
 				AppLogger.getLogger().info("Retrieve warnings:\n" + buf);
-				
+
 			}
 
 			// Write the zip to the file system			
 			AppLogger.getLogger().info("Writing results to zip file");
 			ByteArrayInputStream bais = new ByteArrayInputStream(result.getZipFile());				
-			
+
 			String path = SalesforceMetadataService.getTempDirectory();
 			AppLogger.getLogger().fine("Line 120. String path: " + path);
-			
+
 			Path resultFilePath = Paths.get(path, SalesforceMetadataService.getRetrieveResultFile());			
 			AppLogger.getLogger().fine("Line 122. Path resultFilePath: " + resultFilePath.toAbsolutePath().toString());
-						
+
 			FileOutputStream os = new FileOutputStream(resultFilePath.toAbsolutePath().toString());
-			
+
 			try {
 				ReadableByteChannel src = Channels.newChannel(bais);
 				FileChannel dest = os.getChannel();
 				copy(src, dest);				
 				AppLogger.getLogger().info("in retrieveZip(). Results written to " + resultFilePath.toAbsolutePath().toString());
-				
+
 			} finally {
 				os.close();
 			}
@@ -172,7 +173,7 @@ public class RetrieveMetadata {
 
 		request.setUnpackaged(r);		
 	}
-	
+
 	/**
 	 * Helper method to copy from a readable channel to a writable channel,
 	 * using an in-memory buffer.

@@ -258,7 +258,7 @@ public class BigIdSalesforceAppController {
 			PrintWriter pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
 			AppLogger.getLogger().severe("error log Stack trace:"+ sw.toString());
-			throw new ReturnFalseIndicationExceptionToBigId("false");
+			throw new ReturnFalseIndicationExceptionToBigId(e.getMessage());
 		}		
 		finally {
 			// Close the log handler.

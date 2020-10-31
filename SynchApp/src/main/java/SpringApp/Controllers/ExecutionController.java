@@ -12,6 +12,7 @@ import com.bigid.appinfra.appinfrastructure.DTO.ActionResponseDetails;
 import com.bigid.appinfra.appinfrastructure.DTO.ExecutionContext;
 import com.bigid.appinfra.appinfrastructure.DTO.StatusEnum;
 
+import SpringApp.Services.ActionResult;
 import SpringApp.Services.ExecutionService;
 
 @Controller
@@ -34,12 +35,12 @@ public class ExecutionController extends AbstractExecutionController{
 
 		switch (action) {            
 		case("Sync"):
-			boolean sucess = ((ExecutionService)executionService).Synch(executionContext);
-		if (sucess) {
+			ActionResult result = ((ExecutionService)executionService).Synch(executionContext);
+		if (result.isSucess()) {
 			return generateSyncSuccessMessage(executionId, "The action completed sucessfully");
 		}
 		else {
-			return generateSyncSuccessMessage(executionId, "The action failed");
+			return generateSyncSuccessMessage(executionId, "The action failed with an error message : \"" + result.getText() + "\"");
 		}
 		default:
 			return ResponseEntity.badRequest().body(

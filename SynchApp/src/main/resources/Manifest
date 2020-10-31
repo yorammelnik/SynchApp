@@ -11,7 +11,7 @@
   "actions": [      
     {
       "action_id": "Sync",
-      "description": "Run category synchronization between BigId and Salesforce",
+      "description": "Run category synchronization between BigId and Salesforce.\nThis action is data intensive and may take a few minutes to complete.",
       "is_sync": false,
       "action_params": [	
 			{

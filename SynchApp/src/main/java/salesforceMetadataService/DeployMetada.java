@@ -36,7 +36,7 @@ public class DeployMetada {
     // one second in milliseconds
     private static final long ONE_SECOND = 1000;
     // maximum number of attempts to deploy the zip file
-    private static final int MAX_NUM_POLL_REQUESTS = 6; 
+    private static final int MAX_NUM_POLL_REQUESTS = 10; 
 
         
     public DeployMetada(String retrieveZipFilePath, MetadataConnection metadataConnection) 
@@ -66,11 +66,12 @@ public class DeployMetada {
         do {
             Thread.sleep(waitTimeMilliSecs);
             // double the wait time for the next iteration
-            waitTimeMilliSecs *= 2;
+            waitTimeMilliSecs += 1;
             if (poll++ > MAX_NUM_POLL_REQUESTS) {
-                throw new Exception("Request timed out. If this is a large set " +
+            	AppLogger.getLogger().severe("Request timed out. If this is a large set " +
                         "of metadata components, check that the time allowed by " +
                         "MAX_NUM_POLL_REQUESTS is sufficient.");
+                throw new Exception("The request in Salesforce timed out.");
             }
             
             // Fetch in-progress details once for every 3 polls
