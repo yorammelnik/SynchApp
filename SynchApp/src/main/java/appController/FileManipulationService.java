@@ -504,7 +504,7 @@ public class FileManipulationService {
 	 * 
 	 */
 	private static String extractFullPathChars(File baseDirectoy, String file) throws IOException {
-		AppLogger.getLogger().fine("Beginning of extractFullPathChars");
+		AppLogger.getLogger().finer("Beginning of extractFullPathChars");
 		File f = new File(file);
 		File directoryToZip = f.getParentFile();
 		// we want the zipEntry's path to be a relative path that is relative
@@ -550,7 +550,7 @@ public class FileManipulationService {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
-			// -Ignore package.xml file
+			// Ignore package.xml file
 			if (file.contains("package.xml")) {					
 				continue;
 			}

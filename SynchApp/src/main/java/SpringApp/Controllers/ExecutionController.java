@@ -3,6 +3,7 @@ package SpringApp.Controllers;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,36 +13,31 @@ import com.bigid.appinfra.appinfrastructure.DTO.ActionResponseDetails;
 import com.bigid.appinfra.appinfrastructure.DTO.ExecutionContext;
 import com.bigid.appinfra.appinfrastructure.DTO.StatusEnum;
 
-import SpringApp.Services.ActionResult;
 import SpringApp.Services.ExecutionService;
 
 @Controller
 public class ExecutionController extends AbstractExecutionController{
-	
-	//private static AppLogger logger; 
+
 
 	@Autowired
 	public ExecutionController(ExecutionService executionService) throws SecurityException, IOException {
 		this.executionService = executionService;
-		//logger = new AppLogger();		
 	}
+
+	@Autowired
+	private TaskExecutor taskExecutor;
 
 	@Override
 	public ResponseEntity<ActionResponseDetails> executeAction(@RequestBody ExecutionContext executionContext) {
 		AppLogger.getLogger().info("Begining of executeAction()");
 		String action = executionContext.getActionName();
 		String executionId = executionContext.getExecutionId();
-		
+		executionService.setValuesForBigIDProxy(executionContext);
 
 		switch (action) {            
-		case("Sync"):
-			ActionResult result = ((ExecutionService)executionService).Synch(executionContext);
-		if (result.isSucess()) {
-			return generateSyncSuccessMessage(executionId, "The action completed sucessfully");
-		}
-		else {
-			return generateSyncSuccessMessage(executionId, "The action failed with an error message : \"" + result.getText() + "\"");
-		}
+		case ("Sync"):
+			taskExecutor.execute(() -> runPeriodicAction(executionContext));
+			return generateAyncSuccessMessage(executionId, "Started category synchronization. Please wait...");	
 		default:
 			return ResponseEntity.badRequest().body(
 					new ActionResponseDetails(executionId,
@@ -49,5 +45,10 @@ public class ExecutionController extends AbstractExecutionController{
 							0d,
 							"Got unresolved action = " + action));
 		}
+	}
+
+	private void runPeriodicAction(ExecutionContext executionContext) {
+		AppLogger.getLogger().info("Begining of ExecutionController.runPeriodicAction(), Running an async method periodically...");  		
+		((ExecutionService) executionService).runPeriodicAction(executionContext);
 	}
 }

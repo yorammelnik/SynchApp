@@ -18,7 +18,7 @@
 			"param_name": "Sync BigId category list to Salesforce",
 			"param_type": "String",
 			"is_cleartext": true,
-			"param_description": "A flag for deciding if categories from BigId should be synched to Salesorce.",
+			"param_description": "A flag for deciding if categories from BigId should be synched to Salesorce",
 			"default_value": "true",
 			"param_priority": "primary",
 			"is_mandatory": true
@@ -33,7 +33,7 @@
 			"is_mandatory": true
 			},
 			{
-			"param_name": "Overwrite Salesforce with BigId categories.",
+			"param_name": "Overwrite Salesforce with BigId categories",
 			"param_type": "String",
 			"is_cleartext": true,
 			"param_description": "A flag for deciding if the update from BigId will overwrite or append categories to Saleforce complianceGroup filelds.",
@@ -42,7 +42,7 @@
 			"is_mandatory": true
 			},			
 			{
-			"param_name": "Apply BigId categories to Salesforce.",
+			"param_name": "Apply BigId categories to Salesforce",
 			"param_type": "String",
 			"is_cleartext": true,
 			"param_description": "A flag to decide if categories in BigId should be applied as complianceGroup values to fields in Salesforce.",
@@ -55,7 +55,7 @@
 			"param_type": "String",
 			"is_cleartext": true,
 			"param_description": "Salesforce endpoint url",
-			"default_value": "https://login.salesforce.com/services/Soap/c/49.0",
+			"default_value": "",
 			"param_priority": "primary",
 			"is_mandatory": true
 			},
@@ -64,7 +64,7 @@
 			"param_type": "String",
 			"is_cleartext": false,
 			"param_description": "Salesforce username",
-			"default_value": "yorammelnik@gmail.com",
+			"default_value": "",
 			"param_priority": "primary",
 			"is_mandatory": true
 			},
@@ -73,7 +73,7 @@
 			"param_type": "String",
 			"is_cleartext": false,
 			"param_description": "Salesforce password",
-			"default_value": "Yoya2021",
+			"default_value": "",
 			"param_priority": "primary",
 			"is_mandatory": true
 			},
@@ -82,7 +82,7 @@
 			"param_type": "String",
 			"is_cleartext": false,
 			"param_description": "Salesforce token retrieved from Admin pages in Salesforce",
-			"default_value": "6BS8UStPYgI4NyhRPWcYQLJT",
+			"default_value": "",
 			"param_priority": "primary",
 			"is_mandatory": true
 			},			
@@ -90,7 +90,7 @@
 			"param_name": "Log Level",
 			"param_type": "String",
 			"is_cleartext": true,
-			"param_description": "Log level of the application",
+			"param_description": "Log level of the application. The options are: ALL, SEVERE, WARNING, INFO, FINE, FINER",
 			"default_value": "info",
 			"param_priority": "primary",
 			"is_mandatory": true

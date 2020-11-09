@@ -31,7 +31,8 @@ import salesforceMetadataService.SalesforceMetadataService;
 /*
  * @ Author: Yoram Melnik
  * 
- * Description: A class that manages the connection and synchronization of categories between BigId and Salesforce.
+ * Description: A class that manages the connection and synchronization of categories between BigId and Salesforce. The class extends the
+ * Thread class so that it will run concurrently to the exectionService updating BigId with the progress of execution.
  * The class contains the main method for initiating the app.
  * This class can be "launched" in 2 ways:
  * 1. Launched from ide "run configuration" and then the configuration.xml file is used to initialize all data members. Rarely used. Maninly for develop and debug.
@@ -41,7 +42,7 @@ import salesforceMetadataService.SalesforceMetadataService;
  * 
  */
 
-public class BigIdSalesforceAppController {	
+public class BigIdSalesforceAppController extends Thread{	
 
 	// This flag sets the mode of the way Salesforce is updated. 
 	// When the flag is FASLE BigID categories will be appended to the existing categories of SF.
@@ -89,12 +90,14 @@ public class BigIdSalesforceAppController {
 	private ArrayList<String> BigIdCategoryValues = new ArrayList<String>();
 
 	private LoginData configurationXml = null;
+	
+	private boolean exceptionRaised = false;
 
 	public static void main(String[] args) throws Exception {
 
 		// instantiate the BigIdSalesforceController and call for the appController
 		BigIdSalesforceAppController controller = new BigIdSalesforceAppController();
-		controller.appController();	
+		controller.run();	
 
 	}	
 
@@ -150,7 +153,7 @@ public class BigIdSalesforceAppController {
 			i++;
 		}
 		return params;    
-	}
+	}	
 
 	/**
 	 * The main method of the class that handles the flow of the App. 
@@ -166,13 +169,10 @@ public class BigIdSalesforceAppController {
 	 * 
 	 * @param salesforce_token the salesforce_token to set
 	 * @return the salesforce_token
-	 * @throws IOException 
-	 * @throws SecurityException 
-	 * @throws ReturnFalseIndicationExceptionToBigId 
 	 * @throws Exception 
 	 * 
 	 */
-	public void appController() throws SecurityException, IOException, ReturnFalseIndicationExceptionToBigId {				
+	public void run() {				
 		AppLogger.getLogger().info("Beginning of appController()");
 
 		try {
@@ -258,9 +258,12 @@ public class BigIdSalesforceAppController {
 			PrintWriter pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
 			AppLogger.getLogger().severe("error log Stack trace:"+ sw.toString());
-			throw new ReturnFalseIndicationExceptionToBigId(e.getMessage());
+			
+			// Signal ExectuionService class that there was an exception in the app and that it did not complete.
+			exceptionRaised = true;		
 		}		
 		finally {
+			
 			// Close the log handler.
 			//LoggerSingelton.closeHandler();
 		}
@@ -395,5 +398,10 @@ public class BigIdSalesforceAppController {
 			}			
 		}		
 		return categoriesToAdd;
+	}
+
+	// return if an exception was raised in the class
+	public boolean isExceptionRaised() {
+		return exceptionRaised;
 	}
 }
