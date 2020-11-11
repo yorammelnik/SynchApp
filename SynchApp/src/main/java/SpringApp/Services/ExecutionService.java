@@ -57,10 +57,10 @@ public class ExecutionService extends AbstractExecutionService {
 			
 			// check if an exception is raised in the thread to decide if the action was completed successfully or failed
 			
-			// Therad raised missing Salesforce url exception
-			if (bigController.isIncorrectSalesforceURL()) {
+			// Therad raised Salesforce request time out
+			if (bigController.isSalesforceRequestTimeOut()) {
 				AppLogger.getLogger().severe("In ExecutionService.runPeriodicAction()- the action was not completed successfully");	
-				actionResponseDetails = initializeResponseToBigID(executionContext, StatusEnum.ERROR, 0, "Category syncronization Failed Due to missing Salesforce URL.");
+				actionResponseDetails = initializeResponseToBigID(executionContext, StatusEnum.ERROR, 0, "Category syncronization Failed Due to timeout reportecd from Salesforce. Please Check the log file.");
 				bigIDProxy.updateActionStatusToBigID(actionResponseDetails);
 			}
 			// Therad raised incorrect Salesforce login exception

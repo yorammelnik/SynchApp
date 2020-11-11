@@ -66,12 +66,12 @@ public class DeployMetada {
         do {
             Thread.sleep(waitTimeMilliSecs);
             // double the wait time for the next iteration
-            waitTimeMilliSecs += 1;
+            waitTimeMilliSecs += ONE_SECOND;
             if (poll++ > MAX_NUM_POLL_REQUESTS) {
             	AppLogger.getLogger().severe("Request timed out. If this is a large set " +
                         "of metadata components, check that the time allowed by " +
                         "MAX_NUM_POLL_REQUESTS is sufficient.");
-                throw new Exception("The request in Salesforce timed out.");
+                throw new SalesforceRequestTimeoutException("The Deploy request in Salesforce timed out.");
             }
             
             // Fetch in-progress details once for every 3 polls

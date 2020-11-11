@@ -25,6 +25,7 @@ import bigIdService.BigIdService;
 import bigIdService.CategoryColumnContainer;
 import bigIdService.ColumnToSynch;
 import salesforceMetadataService.SalesforceMetadataService;
+import salesforceMetadataService.SalesforceRequestTimeoutException;
 
 
 
@@ -93,7 +94,7 @@ public class BigIdSalesforceAppController extends Thread{
 	
 	private boolean generalExceptionRaised = false;
 	
-	private boolean incorrectSalesforceURL = false;
+	private boolean salesforceRequestTimeOut = false;
 	
 	private boolean incorrectSalesforceLogin = false;
 
@@ -257,9 +258,9 @@ public class BigIdSalesforceAppController extends Thread{
 		}		
 		
 		// Specific exceptions to signal ExceutionService app handler that there was a problem with login to Salesforce
-		catch (IllegalArgumentException e) {
+		catch (SalesforceRequestTimeoutException e) {
 			AppLogger.getLogger().severe("In ExecutionService.runPeriodicAction() " + e.getMessage());	
-			incorrectSalesforceURL = true;
+			salesforceRequestTimeOut = true;
 		}
 		catch (ConnectionException e) {			
 			AppLogger.getLogger().severe("In ExecutionService.runPeriodicAction() " + e.getMessage());
@@ -421,8 +422,8 @@ public class BigIdSalesforceAppController extends Thread{
 	}
 
 
-	public boolean isIncorrectSalesforceURL() {
-		return incorrectSalesforceURL;
+	public boolean isSalesforceRequestTimeOut() {
+		return salesforceRequestTimeOut;
 	}
 
 
