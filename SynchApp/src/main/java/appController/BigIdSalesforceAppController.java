@@ -91,7 +91,11 @@ public class BigIdSalesforceAppController extends Thread{
 
 	private LoginData configurationXml = null;
 	
-	private boolean exceptionRaised = false;
+	private boolean generalExceptionRaised = false;
+	
+	private boolean incorrectSalesforceURL = false;
+	
+	private boolean incorrectSalesforceLogin = false;
 
 	public static void main(String[] args) throws Exception {
 
@@ -251,8 +255,19 @@ public class BigIdSalesforceAppController extends Thread{
 			//LoggerSingelton.closeHandler();
 
 		}		
-		// All exception are caught and written to log file and than a new exception is thrown to 
-		// indicate to BigId that the action did not complete correctly
+		
+		// Specific exceptions to signal ExceutionService app handler that there was a problem with login to Salesforce
+		catch (IllegalArgumentException e) {
+			AppLogger.getLogger().severe("In ExecutionService.runPeriodicAction() " + e.getMessage());	
+			incorrectSalesforceURL = true;
+		}
+		catch (ConnectionException e) {			
+			AppLogger.getLogger().severe("In ExecutionService.runPeriodicAction() " + e.getMessage());
+			incorrectSalesforceLogin = true;
+		}		
+		
+		// All exception not related to Salesforce login and url are caught and written to log file. 
+		// A flag is set to true to indicate to ExecutionService that the action did not complete correctly
 		catch (Exception e) {	
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
@@ -260,7 +275,7 @@ public class BigIdSalesforceAppController extends Thread{
 			AppLogger.getLogger().severe("error log Stack trace:"+ sw.toString());
 			
 			// Signal ExectuionService class that there was an exception in the app and that it did not complete.
-			exceptionRaised = true;		
+			generalExceptionRaised = true;		
 		}		
 		finally {
 			
@@ -401,7 +416,17 @@ public class BigIdSalesforceAppController extends Thread{
 	}
 
 	// return if an exception was raised in the class
-	public boolean isExceptionRaised() {
-		return exceptionRaised;
+	public boolean isGeneralExceptionRaised() {
+		return generalExceptionRaised;
+	}
+
+
+	public boolean isIncorrectSalesforceURL() {
+		return incorrectSalesforceURL;
+	}
+
+
+	public boolean isIncorrectSalesforceLogin() {
+		return incorrectSalesforceLogin;
 	}
 }

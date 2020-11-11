@@ -385,6 +385,7 @@ public class FileManipulationService {
 		}
 
 		// delete fields in package.xml that were not retrieved from Salesforce
+		AppLogger.getLogger().fine("End of addComplianceGroupToZipFile() before calling deleteFieldsFromPackageXml(). bigIdColumnsToSynch: " + bigIdColumnsToSynch.toString());
 		deleteFieldsFromPackageXml(packageXmlFile, retrievedFieldNamesList);
 	}
 
@@ -416,7 +417,7 @@ public class FileManipulationService {
 	 * 
 	 */
 	private static String extractTableNameFromPath(String path) throws SecurityException, IOException {	
-		AppLogger.getLogger().fine("extractTableNameFromPath");
+		AppLogger.getLogger().finer("extractTableNameFromPath");
 
 		Path p = Paths.get(path);
 		String file = p.getFileName().toString();
@@ -433,6 +434,7 @@ public class FileManipulationService {
 	 */
 	private static void deleteFieldsFromPackageXml(String packageXmlFile, ArrayList<String> retrievedFieldNamesList) throws ParserConfigurationException, SAXException, IOException, TransformerException {
 		AppLogger.getLogger().info("Beginning of deleteFieldsFromPackageXml");
+		AppLogger.getLogger().fine("Beginning of deleteFieldsFromPackageXml. retrievedFieldNamesList: " + retrievedFieldNamesList);		
 
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -455,6 +457,7 @@ public class FileManipulationService {
 					Node innerTag = currFieldTags.item(j);						
 					if ("members".equals(innerTag.getNodeName())) {							
 						member = innerTag.getTextContent();
+						AppLogger.getLogger().fine("deleteFieldsFromPackageXml. current member: " + member);
 						// delete all the "type" tages that are not in the list
 						if (!retrievedFieldNamesList.contains(member)) {
 							costumObject.removeChild(field);

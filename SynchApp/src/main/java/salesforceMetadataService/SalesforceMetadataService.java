@@ -175,7 +175,7 @@ public class SalesforceMetadataService {
 	 * A method that deploys all new attributes from BigId to Salesforce
 	 */
 	public void deployAttributes(Boolean OVERWRITE_SF, ArrayList<ColumnToSynch> bigIdColumnsToSynch) throws RemoteException, Exception {
-		AppLogger.getLogger().info("Beginning of deployAttributes(). newAttributes lists:");
+		AppLogger.getLogger().info("Beginning of deployAttributes()");
 
 		RetrieveMetadata ret = new RetrieveMetadata(metadataConnection);
 		File retrieveResult = ret.retrieveZip(bigIdColumnsToSynch);	
@@ -199,10 +199,10 @@ public class SalesforceMetadataService {
 
 		Path unzippedDirectoryPath = Paths.get(getTempDirectory(), UNZIPPED_DIRECTORY);
 
-		AppLogger.getLogger().fine("In updateRetrievedData(), Line 193, UNZIPPED_DIRECTORY: " +UNZIPPED_DIRECTORY);
-		AppLogger.getLogger().fine("In updateRetrievedData(), Line 143, FileManipulationService.getResourceDirectory(): " + getTempDirectory() );
-		AppLogger.getLogger().fine("In updateRetrievedData(), Line 195, path: " + unzippedDirectoryPath.toAbsolutePath().toString());
-		AppLogger.getLogger().fine("In updateRetrievedData(), Line 196, retrievedZipFilePath: " + retrievedZipFilePath);
+		AppLogger.getLogger().finer("In updateRetrievedData(), Line 193, UNZIPPED_DIRECTORY: " +UNZIPPED_DIRECTORY);
+		AppLogger.getLogger().finer("In updateRetrievedData(), Line 143, FileManipulationService.getResourceDirectory(): " + getTempDirectory() );
+		AppLogger.getLogger().finer("In updateRetrievedData(), Line 195, path: " + unzippedDirectoryPath.toAbsolutePath().toString());
+		AppLogger.getLogger().finer("In updateRetrievedData(), Line 196, retrievedZipFilePath: " + retrievedZipFilePath);
 
 		String unzippedDirectory = FileManipulationService.extractZipFile(retrievedZipFilePath, unzippedDirectoryPath.toString() );		
 

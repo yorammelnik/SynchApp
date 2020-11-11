@@ -1,7 +1,6 @@
 package SpringApp.Services;
 
 import java.util.ArrayList;
-import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -55,23 +54,47 @@ public class ExecutionService extends AbstractExecutionService {
 				AppLogger.getLogger().info("In ExecutionService.runPeriodicAction()" + actionResponseDetails);
 				bigIDProxy.updateActionStatusToBigID(actionResponseDetails);				
 			}
-
+			
 			// check if an exception is raised in the thread to decide if the action was completed successfully or failed
-			if (! bigController.isExceptionRaised()) {
-				actionResponseDetails = initializeResponseToBigID(executionContext, StatusEnum.COMPLETED, 1, "Category syncronization completed!");
-				bigIDProxy.updateActionStatusToBigID(actionResponseDetails);				
+			
+			// Therad raised missing Salesforce url exception
+			if (bigController.isIncorrectSalesforceURL()) {
+				AppLogger.getLogger().severe("In ExecutionService.runPeriodicAction()- the action was not completed successfully");	
+				actionResponseDetails = initializeResponseToBigID(executionContext, StatusEnum.ERROR, 0, "Category syncronization Failed Due to missing Salesforce URL.");
+				bigIDProxy.updateActionStatusToBigID(actionResponseDetails);
 			}
-			else {
+			// Therad raised incorrect Salesforce login exception
+			else if (bigController.isIncorrectSalesforceLogin()) {
+				AppLogger.getLogger().severe("In ExecutionService.runPeriodicAction()- the action was not completed successfully");	
+				actionResponseDetails = initializeResponseToBigID(executionContext, StatusEnum.ERROR, 0, "Category syncronization Failed Due to incorrect login parameters to Salesforce.");
+				bigIDProxy.updateActionStatusToBigID(actionResponseDetails);
+			}		
+			// General exception in the thread
+			else if (bigController.isGeneralExceptionRaised()) {
 				AppLogger.getLogger().severe("In ExecutionService.runPeriodicAction()- the action was not completed successfully");	
 				actionResponseDetails = initializeResponseToBigID(executionContext, StatusEnum.ERROR, 0, "Category syncronization Failed. Please Check the log file.");
-				bigIDProxy.updateActionStatusToBigID(actionResponseDetails);				
+				bigIDProxy.updateActionStatusToBigID(actionResponseDetails);
+								
+			}
+			// No exceptions were raised in the Thread. Action completed sucessfully
+			else {
+				actionResponseDetails = initializeResponseToBigID(executionContext, StatusEnum.COMPLETED, 1, "Category syncronization completed!");
+				bigIDProxy.updateActionStatusToBigID(actionResponseDetails);			
 			}
 
-		} catch (Exception ex) {
-			AppLogger.getLogger().severe("In ExecutionService.runPeriodicAction() " + ex.getMessage());	
+		}		
+				
+		catch (ActoionParamValueException e) {
+			AppLogger.getLogger().severe("In ExecutionService.runPeriodicAction() " + e.getMessage());	
+			actionResponseDetails = initializeResponseToBigID(executionContext, StatusEnum.ERROR, 0, e.getMessage());
+			bigIDProxy.updateActionStatusToBigID(actionResponseDetails);
+		}		
+		catch (Exception e) {
+			AppLogger.getLogger().severe("In ExecutionService.runPeriodicAction() " + e.getMessage());	
 			actionResponseDetails = initializeResponseToBigID(executionContext, StatusEnum.ERROR, 0, "Category syncronization Failed. Please Check the log file.");
 			bigIDProxy.updateActionStatusToBigID(actionResponseDetails);
 		}
+	
 
 	}
 
@@ -88,7 +111,7 @@ public class ExecutionService extends AbstractExecutionService {
 		for (int i = 0; i < actionParams.size(); i++) {
 			ParamDetails currParam = actionParams.get(i);
 			if (booleanParameters.contains(currParam.getParamName()) && ! ( "true".equals(currParam.getParamValue() ) || "false".equals(currParam.getParamValue()) )) {				
-				throw new Exception("One of the flag action parametes is incorrect. Flag Name:  " + currParam.getParamName() + ", Flag value: " + currParam.getParamValue() );
+				throw new ActoionParamValueException("One of the flag action parametes is incorrect. Flag Name:  " + currParam.getParamName() + ", Flag value: " + currParam.getParamValue() );
 			}
 		}
 	}
