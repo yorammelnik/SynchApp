@@ -302,7 +302,7 @@ public class FileManipulationService {
 		for (String file : filesToManipulate) {
 			AppLogger.getLogger().info("In addComplianceGroupToZipFile() filesToManipulate loop. Current file is: " + file);
 
-			// -Ignore package.xml file
+			// Ignore package.xml file
 			if (file.contains("package.xml")) {	
 				// save the package.xml file for later processing
 				packageXmlFile = file;
@@ -329,8 +329,11 @@ public class FileManipulationService {
 					// if OVERWRITE_COMPLIANCE_TAGS is true than delete all compliance group tags and later insert the new ones
 					for (int j = 0; j < currFieldTags.getLength(); j++) {
 						Node innerTag = currFieldTags.item(j);
-						if ("fullName".equals(innerTag.getNodeName())) {							
-							fullName = innerTag.getTextContent();
+						if ("fullName".equals(innerTag.getNodeName())) {	
+							String name = capitalize(innerTag.getTextContent());
+							innerTag.setTextContent(name);
+							fullName = name;
+							//fullName =innerTag.getTextContent();
 						}
 						// Save the content of the current complianceGroup value. 
 						// If the OVERWRITE_COMPLIANCE_TAGS flag is false than the value will be added to
@@ -354,7 +357,7 @@ public class FileManipulationService {
 						categories.removeAll(listForHoldingComplianceValues);
 						categories.addAll(listForHoldingComplianceValues);
 					}
-					// empty listForHoldingComplianceValues list for the next 
+					// empty listForHoldingComplianceValues list for the next field
 					listForHoldingComplianceValues = null;
 
 					// add the element only if childs were added - i.e, there are categories to add
@@ -385,9 +388,17 @@ public class FileManipulationService {
 		}
 
 		// delete fields in package.xml that were not retrieved from Salesforce
-		AppLogger.getLogger().fine("End of addComplianceGroupToZipFile() before calling deleteFieldsFromPackageXml(). bigIdColumnsToSynch: " + bigIdColumnsToSynch.toString());
+		AppLogger.getLogger().fine("End of addComplianceGroupToZipFile() before calling deleteFieldsFromPackageXml(). bigIdColumnsToSynch: " + bigIdColumnsToSynch);
 		deleteFieldsFromPackageXml(packageXmlFile, retrievedFieldNamesList);
 	}
+	
+	// A method that capitalizes an input String
+	public static String capitalize(String str)
+	{
+	    if(str == null) return str;
+	    return str.substring(0, 1).toUpperCase() + str.substring(1);
+	}
+	
 
 	// A method that extracts from the string the complianceGroup values without the ';' char between them.
 	private static ArrayList<String> addComplianceGroupSeperately( String textContent) {
@@ -455,12 +466,14 @@ public class FileManipulationService {
 
 				for (int j = 0; j < currFieldTags.getLength(); j++) {
 					Node innerTag = currFieldTags.item(j);						
-					if ("members".equals(innerTag.getNodeName())) {							
+					if ("members".equalsIgnoreCase(innerTag.getNodeName())) {							
 						member = innerTag.getTextContent();
 						AppLogger.getLogger().fine("deleteFieldsFromPackageXml. current member: " + member);
 						// delete all the "type" tages that are not in the list
-						if (!retrievedFieldNamesList.contains(member)) {
+						//if (! retrievedFieldNamesList.contains(member)) 						
+						if (! itemExists(retrievedFieldNamesList , member)) {							
 							costumObject.removeChild(field);
+							AppLogger.getLogger().fine("deleteFieldsFromPackageXml. member deleted: " + member );
 						}
 						break;
 					}
@@ -477,6 +490,18 @@ public class FileManipulationService {
 
 
 	}
+
+	private static boolean itemExists(ArrayList<String> list, String item) {
+		boolean itemExists = false;
+		for(int i = 0; i < list.size(); i++) {
+			if (item.equalsIgnoreCase(list.get(i))) {
+				itemExists = true;
+				break;
+			}
+		}
+		return itemExists;
+	}
+
 
 	/**
 	 * Get the categories for the param field in the specific table
@@ -528,7 +553,7 @@ public class FileManipulationService {
 	 */
 	public static ArrayList<String> getFilesFromZipfile(File retrieveResult) throws IOException {
 		AppLogger.getLogger().info("Beginning of getFilesFromZipfile() file is: " + retrieveResult.toString());
-		
+
 		File parentDir = new File(retrieveResult.getAbsolutePath()).getParentFile();
 		ZipFile zipFile = new ZipFile(retrieveResult.getAbsolutePath());
 

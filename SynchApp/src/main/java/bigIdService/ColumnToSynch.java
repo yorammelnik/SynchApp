@@ -40,7 +40,7 @@ public class ColumnToSynch {
 	}
 	
 	public String toString() {
-		return new String(tableFullyQualifiedName + " ," + columnName + " ," + attributes.toString()  +  " ," + categories.toString() );
+		return new String(tableFullyQualifiedName + "-" + columnName + "-" + attributes.toString()  +  "-" + categories.toString() );
 	}
 	/**
 	 * @param source the source to set

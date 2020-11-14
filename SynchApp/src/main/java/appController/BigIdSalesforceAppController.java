@@ -247,7 +247,7 @@ public class BigIdSalesforceAppController extends Thread{
 			AppLogger.getLogger().fine("After bigIdConnectionService.getObjectsToSynch().");
 
 			// Write BigId columns with their categories (is they exist) to Salesforce
-			if (APPLY_BIGID_CATEGORIES_TO_SALESFORCE) {							
+			if (APPLY_BIGID_CATEGORIES_TO_SALESFORCE) {					
 				salesforceMetaConnectionService.deployAttributes(OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID, bigIdColumnsToSynch);
 				AppLogger.getLogger().fine("After salesforceMetaConnectionService.deployAttributes. UPDATE_SF_TO_REFLECT_BIGID flag is " + OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID);	
 			}
