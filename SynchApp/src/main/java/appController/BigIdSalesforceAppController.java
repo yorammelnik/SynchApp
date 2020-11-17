@@ -133,8 +133,8 @@ public class BigIdSalesforceAppController extends Thread{
 
 		this.SYNCH_CATEGORY_TO_SALESFORCE = Boolean.valueOf(args[0]);
 		this.APPLY_SALESFORCE_CATEGORIES_TO_CORRELATION_SETS = Boolean.valueOf(args[1]);
-		this.OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID = Boolean.valueOf(args[2]);		
-		this.APPLY_BIGID_CATEGORIES_TO_SALESFORCE = Boolean.valueOf(args[3]);
+		this.APPLY_BIGID_CATEGORIES_TO_SALESFORCE = Boolean.valueOf(args[2]);
+		this.OVERWRITE_SF_CATEGORIES_TO_REFLECT_BIGID = Boolean.valueOf(args[3]);		
 		this.Salesforce_url = args[4];
 		this.Salesforce_username = args[5];
 		this.Salesforce_password = args[6];

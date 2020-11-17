@@ -656,7 +656,7 @@ public class BigIdService {
 		// Iterate through the JSONAraay and find the correlationSets that are dsConncetion==Salesforce
 		for (int i = 0; i < correlationSets.length(); i++) {
 			JSONObject currentJson = correlationSets.getJSONObject(i);
-			if (currentJson.getString("dsConnection").equals("Salesforce")) {
+			if (currentJson.getString("dsConnection").contains("Salesforce")) {
 				salesForceCorrelationSets.add(currentJson);
 			}			
 		}
@@ -668,12 +668,12 @@ public class BigIdService {
 			JSONArray attributes = jsonObject.getJSONArray("attributes");
 			for (int i = 0; i < attributes.length(); i++) {
 				JSONObject currentJson = (JSONObject) attributes.get(i);
-				if ( !currentJson.isNull("selection") &&  currentJson.getBoolean("selection")) {
+				//if ( !currentJson.isNull("selection") &&  currentJson.getBoolean("selection")) {
 					String tableName = jsonObject.getString("db_table");
 					ColumnToSynch currColumn = new ColumnToSynch("Salesforce" , tableName );
 					currColumn.setColumnName(currentJson.getString("columnName"));
 					columnsToRetrieve.add(currColumn);
-				}
+				//}
 			}						
 		}
 

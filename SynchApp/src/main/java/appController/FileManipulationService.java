@@ -330,10 +330,12 @@ public class FileManipulationService {
 					for (int j = 0; j < currFieldTags.getLength(); j++) {
 						Node innerTag = currFieldTags.item(j);
 						if ("fullName".equals(innerTag.getNodeName())) {	
+							// Make sure that thr first letter in all the fields is capitalized. Otherwise the deployment 
+							// will fail becasue all the fields in Package.xml are capitalized.
 							String name = capitalize(innerTag.getTextContent());
 							innerTag.setTextContent(name);
 							fullName = name;
-							//fullName =innerTag.getTextContent();
+							
 						}
 						// Save the content of the current complianceGroup value. 
 						// If the OVERWRITE_COMPLIANCE_TAGS flag is false than the value will be added to

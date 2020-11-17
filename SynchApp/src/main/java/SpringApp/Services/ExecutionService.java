@@ -49,7 +49,7 @@ public class ExecutionService extends AbstractExecutionService {
 				if (j < 9) {
 					j++;
 				}
-				String message = "Execution is in porgress...";
+				String message = "Execution is in progress...";
 				actionResponseDetails = initializeResponseToBigID(executionContext, StatusEnum.IN_PROGRESS, progress, message);
 				AppLogger.getLogger().info("In ExecutionService.runPeriodicAction()" + actionResponseDetails);
 				bigIDProxy.updateActionStatusToBigID(actionResponseDetails);				

@@ -1,7 +1,7 @@
 {
   "app_name": "Salesforce Data Classification",
   "description": "Application for Synching BigId & Salesforce categories",
-  "category": "privacy",
+  "category": "Utilities",
   "license_type":"PAID",
   "vendor": "YoYa LLC",
   "license_verification_key": "",
@@ -33,15 +33,6 @@
 			"is_mandatory": true
 			},
 			{
-			"param_name": "Overwrite Salesforce with BigId categories",
-			"param_type": "String",
-			"is_cleartext": true,
-			"param_description": "A flag for deciding if the update from BigId will overwrite or append categories to Saleforce complianceGroup filelds.",
-			"default_value": "false",
-			"param_priority": "primary",
-			"is_mandatory": true
-			},			
-			{
 			"param_name": "Apply BigId categories to Salesforce",
 			"param_type": "String",
 			"is_cleartext": true,
@@ -49,7 +40,16 @@
 			"default_value": "true",
 			"param_priority": "primary",
 			"is_mandatory": true
-			},		
+			},
+			{
+			"param_name": "Overwrite Salesforce with BigId categories",
+			"param_type": "String",
+			"is_cleartext": true,
+			"param_description": "A flag for deciding if the update from BigId will overwrite or append categories to Saleforce complianceGroup filelds.",
+			"default_value": "false",
+			"param_priority": "primary",
+			"is_mandatory": true
+			},	
 			{
 			"param_name": "Salesforce url",
 			"param_type": "String",
