@@ -294,12 +294,12 @@ public class BigIdSalesforceAppController extends Thread{
 	private void getComplianceGrupeValuesForCorrelationSetFields() throws Exception {
 		AppLogger.getLogger().info("Beginning of getComplianceGrupeValuesForCorrelationSetFields()");
 
-		// Get columns from all the "Salesforce" correlation Sets
-		ArrayList<ColumnToSynch> columns = bigIdConnectionService.getColumnsFromCorrelationsets();		
-
+		// Get all the attributes from the correlation page that are RELEVANT to the Correlation sets that are set for Salesforce	    
+		ArrayList<ColumnToSynch> attributes = bigIdConnectionService.getAttributesForRetrieval();
+		
 		// Use SalesforceMetadataService (through RetrieveMetadata) to retrieve the specific fields with their complianceGroup value 
 		// from Salesforce
-		ArrayList<CategoryColumnContainer> complianceGroupToUpdate = salesforceMetaConnectionService.retrieveCorrelationSetColumnsFromSalesforce(columns);		
+		ArrayList<CategoryColumnContainer> complianceGroupToUpdate = salesforceMetaConnectionService.retrieveCorrelationSetColumnsFromSalesforce(attributes);		
 
 		// Iterate through the fields that were retrieved from Salesforce and set the complianceGroup values as 
 		// categories for the specific field in BigId

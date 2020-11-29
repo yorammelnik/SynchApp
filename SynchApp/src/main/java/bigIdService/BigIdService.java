@@ -42,7 +42,9 @@ public class BigIdService {
 	private final static String VERSION = "/v1";
 	private final static String SESSIONS = "/sessions";
 	private final static String DATA_CATEGORIES = "/data_categories";
+	private final static String ATTRIBUTES = "/lineage/attributes";
 	private final static String ID_CONNECTIOS = "/id_connections";
+	private final static String DS_CONNECTIOS = "/ds_connections";
 
 
 	private static final int CONNECTION_TIMEOUT = 3000;
@@ -80,8 +82,8 @@ public class BigIdService {
 	/**
 	 * A method for creating an httpClient.
 	 * 
-	 * Use sslcontext library to deal with BigId instance in Development without SSL certificate
-	 * use this only when there isn't a certificate in the BigId environment.
+	 * Use sslcontext library to deal with BigId instance in Development without SSL certificate.
+	 * Use this only when there isn't a certificate in the BigId environment.
 	 * @throws IOException 
 	 * @throws SecurityException 
 	 */
@@ -111,7 +113,7 @@ public class BigIdService {
 	}
 
 	/**	 
-	 * A method that initiated the first connection to BigId and stores the seession auth_tokn in TOKEN data member
+	 * A method that initiated the first connection to BigId and stores the session auth_tokn in TOKEN data member
 	 * 
 	 * @param: A list of the categories that need to be added to BigId
 	 * @return - A list of the categories in BigId
@@ -166,6 +168,7 @@ public class BigIdService {
 	 */
 	public ArrayList<String> getCategories() throws ClientProtocolException, IOException, ResponseNotOKException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		AppLogger.getLogger().fine("Beginning of getCategories() {}");
+
 		String uri = URL + API + VERSION + DATA_CATEGORIES;
 
 		HttpGet getRequest = new HttpGet(uri);
@@ -196,6 +199,7 @@ public class BigIdService {
 			currentJson = categories.getJSONObject(i);
 			categoryList.add(currentJson.getString("name"));
 		}
+
 		return categoryList;
 	}
 
@@ -304,7 +308,7 @@ public class BigIdService {
 
 			JSONObject currentSFOjbect = new JSONObject(EntityUtils.toString(response.getEntity()));
 			AppLogger.getLogger().fine("IN getObjectsToSynch, currentSFOjbect is: " + currentSFOjbect.toString());
-			
+
 			JSONArray columns = currentSFOjbect.getJSONArray("data");
 
 			for (int k = 0; k < columns.length(); k++) {
@@ -343,7 +347,7 @@ public class BigIdService {
 
 	/**	 
 	 * Salesforce has complex fields that are split into a few sub fields. Address is split to City, Country, PostalCode, State, Street, etc.... 
-	 * Name in Salesforce is also comple and splitted to FirstName and LastName.
+	 * Name in Salesforce is also complex and is splitted to FirstName and LastName.
 	 * In BigId we use the splitted fields but when sending the data to Salesforce we need to combine them into the complex field. We
 	 * gather all the categories from the sub fields and append them to the complex field.
 	 * 
@@ -437,12 +441,10 @@ public class BigIdService {
 		for (Iterator iterator = categoryAndColumnList.iterator(); iterator.hasNext();) {
 			CategoryColumnContainer currContainer = (CategoryColumnContainer) iterator.next();
 			if (currContainer.getTableName().equals(currObject) && (currContainer.getColumnNames().contains(column)) ) {
-
 				for (Iterator iterator2 = currContainer.getCategories().iterator(); iterator2.hasNext(); ) {
 					String currCategory = (String) iterator2.next();
 					categoriesFound.add(currCategory);					
 				}
-
 			}
 		}
 
@@ -613,8 +615,174 @@ public class BigIdService {
 		}
 	}
 
+
 	/**	 
-	 * Get all the relevant columns from the relevan correlationSets 
+	 * Get all the relevant columns from Attributes list in the correlation page that correspond to the correlationsets that are set for Salesforce.
+	 * These are the attributes that need to be sent to Salesforce to retrieve their complianceGroup values. 
+	 * 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException 
+	 * @throws IOException 
+	 * @throws SecurityException 
+	 * @throws ResponseNotOKException 
+	 * @throws ParseException 
+	 * 
+	 */
+	public ArrayList<ColumnToSynch> getAttributesForRetrieval() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, SecurityException, IOException, ParseException, ResponseNotOKException{
+		AppLogger.getLogger().info("Beginning of getAttributesForRetrieval()");
+
+		// Get all the fields from the correlation sets that are of data source type "Salesforce"
+		ArrayList<ColumnToSynch> relevantColumsFromCorrelation = getColumnsFromCorrelationsets();
+
+		// Get all the attributes from correlation page
+		JSONArray idsor_attributes = getCurrentAttributes();
+
+		ArrayList<ColumnToSynch> columnsToRetrieve = new ArrayList<ColumnToSynch>();
+
+		// loop through the attribute list and for each attribute that exists in relevantColumsFromCorrelation create a ColumnToSynch 
+		for (int i = 0; i < idsor_attributes.length(); i++) {
+			String attribute = idsor_attributes.getJSONObject(i).getString("friendly_name");
+			
+			ArrayList<ColumnToSynch> attributeFound = isAttributeExistInCorrelation(attribute, relevantColumsFromCorrelation);
+
+			if (! attributeFound.isEmpty()) {
+				
+				// For each table that the attribute is in it create a ColumnToSynch object
+				for(int j = 0; j < attributeFound.size(); j++) {
+					ColumnToSynch currColumn = new ColumnToSynch("Salesforce" , attributeFound.get(j).getTableFullyQualifiedName());
+					currColumn.setColumnName(attribute);
+					columnsToRetrieve.add(currColumn);
+				}	
+			}
+		}
+
+		// Convert primitive fields into their complex types because the retrieval from Salesforce is from the Complex field
+		// The method updates columnsToRetrieve list that is sent as a parameter.
+		convertPrimitve2Complex(columnsToRetrieve);
+		return columnsToRetrieve;
+	}
+
+	/**	 
+	 * Find if the attribure parameter exists in the input list. if exists return it. Otherwise, return null
+	 * @throws KeyStoreException  
+	 * 
+	 */
+	private ArrayList<ColumnToSynch> isAttributeExistInCorrelation(String attribute,
+			ArrayList<ColumnToSynch> relevantColumsFromCorrelation) {
+		AppLogger.getLogger().fine("Beginning of isAttributeExistInCorrelation()");
+
+		ArrayList<ColumnToSynch> columnsFound = new ArrayList<ColumnToSynch>();
+
+		for (int i = 0; i < relevantColumsFromCorrelation.size(); i++) {
+			if (attribute.equalsIgnoreCase(relevantColumsFromCorrelation.get(i).getColumnName())) {
+				columnsFound.add(relevantColumsFromCorrelation.get(i));
+			}
+		}
+		return columnsFound;
+	}
+
+	/**	 
+	 * Get all the relevant Attributes from the correlation page. 
+	 * 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException 
+	 * @throws IOException 
+	 * @throws SecurityException 
+	 * @throws ResponseNotOKException 
+	 * @throws ParseException 
+	 * 
+	 */
+	public JSONArray getCurrentAttributes() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, SecurityException, IOException, ParseException, ResponseNotOKException {
+		AppLogger.getLogger().info("Beginning of getCurrentAttributes()");
+
+		String uri = URL + API + VERSION + ATTRIBUTES;
+
+		HttpGet getRequest = new HttpGet(uri);
+		getRequest.setHeader("Authorization", TOKEN);
+		getRequest.setHeader("Accept", "application/json");
+		getRequest.setHeader("Content-type", "application/json");
+
+		// Set CONNECTION_TIMEOUT seconds timeout for the http call
+		final RequestConfig timeoutParams = RequestConfig.custom().setConnectTimeout(CONNECTION_TIMEOUT).setSocketTimeout(CONNECTION_TIMEOUT).build();
+		getRequest.setConfig(timeoutParams);
+
+		createClient();
+		HttpResponse response = client.execute(getRequest);
+		proccessHttpResponse(response, uri);
+
+		String result = EntityUtils.toString(response.getEntity());
+
+		AppLogger.getLogger().fine("In getAttributes(), result string for uri: " + uri + ":" + result);
+
+		// Go down the Jsonobject hierarchy until reaching the list of attributes.
+		JSONObject Jresult  = new JSONObject(result);
+		JSONArray data = Jresult.getJSONArray("data");
+		JSONObject jArrayData = data.getJSONObject(0);
+		JSONObject attributes = jArrayData.getJSONObject("attributes");
+		JSONArray idsor_attributes = attributes.getJSONArray("idsor_attributes");
+
+		return idsor_attributes;
+	}
+
+
+	/**	 
+	 * Get all the tables that are linked to the input attribute parameter in the correlation page.
+	 * 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException 
+	 * @throws IOException 
+	 * @throws SecurityException 
+	 * @throws ResponseNotOKException 
+	 * @throws ParseException 
+	 * 
+	 */
+	private ArrayList<String> getTablesForAttribute(String attribute) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, SecurityException, IOException, ParseException, ResponseNotOKException {
+		AppLogger.getLogger().fine("Beginning of getTablesForAttribute()");
+
+		ArrayList<String> tables = new ArrayList<String>();
+		String uri = URL + API + VERSION + "/lineage/collections?filter=attribute=" + attribute;
+
+
+		HttpGet getRequest = new HttpGet(uri);
+		getRequest.setHeader("Authorization", TOKEN);
+		getRequest.setHeader("Accept", "application/json");
+		getRequest.setHeader("Content-type", "application/json");
+
+		// Set CONNECTION_TIMEOUT seconds timeout for the http call
+		final RequestConfig timeoutParams = RequestConfig.custom().setConnectTimeout(CONNECTION_TIMEOUT).setSocketTimeout(CONNECTION_TIMEOUT).build();
+		getRequest.setConfig(timeoutParams);
+
+		createClient();
+		HttpResponse response = client.execute(getRequest);
+		proccessHttpResponse(response, uri);
+
+		String result = EntityUtils.toString(response.getEntity());
+
+		AppLogger.getLogger().fine("In getTablesForAttribute(), result string for uri: " + uri + ":" + result);
+
+		// Set the results into a JSONArray.  
+		JSONObject Jresult  = new JSONObject(result);
+		JSONArray data = Jresult.getJSONArray("data");
+		JSONObject collectionsInfo = data.getJSONObject(0);
+		JSONArray collections = collectionsInfo.getJSONArray("collectionsInfo");	
+
+		for (int i = 0; i <  collections.length(); i++) {			
+			JSONObject jo = collections.getJSONObject(i);			
+			JSONArray ja = jo.getJSONArray("collections");
+			for (int k = 0; k < ja.length(); k++){
+				// remove "Salesforce" from the table name. Salesforce.contact --> contact
+				tables.add(ja.getString(k).substring(11));
+			}
+		}
+
+		return tables;
+	}
+
+	/**	 
+	 * Get all the relevant columns from the relevant correlationSets 
 	 * 
 	 * @throws KeyStoreException 
 	 * @throws NoSuchAlgorithmException 
@@ -651,41 +819,93 @@ public class BigIdService {
 		// Set the results into a JSONArray.  
 		JSONArray correlationSets  = new JSONObject(result).getJSONArray("id_connections");
 
+
+		// Get all the data sources in Bigid in order to be able to find all the correlation sets that their
+		// data source type is Saleforce.
+		JSONArray dataSources = getCurrentDataSourceFromDB();
+
 		ArrayList<JSONObject> salesForceCorrelationSets = new ArrayList<JSONObject>();
 
-		// Iterate through the JSONAraay and find the correlationSets that are dsConncetion==Salesforce
+		// Iterate through the JSONAraay "correlationSets" and find the correlationSets that their data sourse is of type "Salesforce"
 		for (int i = 0; i < correlationSets.length(); i++) {
-			JSONObject currentJson = correlationSets.getJSONObject(i);
-			if (currentJson.getString("dsConnection").contains("Salesforce")) {
-				salesForceCorrelationSets.add(currentJson);
-			}			
+			JSONObject currentCorrelation = correlationSets.getJSONObject(i);
+			// only work with correlation sets that are enabled
+			if (currentCorrelation.getString("enabled").equalsIgnoreCase("yes")) {
+				String correlationDsConncection = currentCorrelation.getString("dsConnection");
+				// loop through the data source list and add to salesForceCorrelationSets the correlation sets that
+				// are of type "Salesforce"
+				for (int j = 0; j < dataSources.length(); j++) {
+					JSONObject currentDatasource = dataSources.getJSONObject(j);
+					String datasourceName = currentDatasource.getString("name");
+					if (datasourceName.equalsIgnoreCase(correlationDsConncection)  && currentDatasource.getString("type").equalsIgnoreCase("Salesforce") ) {
+						salesForceCorrelationSets.add(currentCorrelation);
+					}
+				}	
+			}
 		}
 
-		// Iterate over each correlation set and extract all the columns that "selection" is set to true into columnsToRetrieve list
+		// Iterate over each correlation set and extract all the columns into columnsToRetrieve list
 		ArrayList<ColumnToSynch> columnsToRetrieve = new ArrayList<ColumnToSynch>();		
 		for (Iterator iterator = salesForceCorrelationSets.iterator(); iterator.hasNext();) {
 			JSONObject jsonObject = (JSONObject) iterator.next();
 			JSONArray attributes = jsonObject.getJSONArray("attributes");
 			for (int i = 0; i < attributes.length(); i++) {
-				JSONObject currentJson = (JSONObject) attributes.get(i);
-				//if ( !currentJson.isNull("selection") &&  currentJson.getBoolean("selection")) {
-					String tableName = jsonObject.getString("db_table");
-					ColumnToSynch currColumn = new ColumnToSynch("Salesforce" , tableName );
-					currColumn.setColumnName(currentJson.getString("columnName"));
-					columnsToRetrieve.add(currColumn);
-				//}
+				JSONObject currentJson = (JSONObject) attributes.get(i);				
+				String tableName = jsonObject.getString("db_table");
+				ColumnToSynch currColumn = new ColumnToSynch("Salesforce" , tableName );
+				currColumn.setColumnName(currentJson.getString("columnName"));
+				columnsToRetrieve.add(currColumn);				
 			}						
 		}
 
 		// Convert primitive fields into their complex types because the retrieval from Salesforce is from the Complex field
 		// The method updates columnsToRetrieve list that is sent as a parameter.
-		convertPrimitve2Complex(columnsToRetrieve);
+		//convertPrimitve2Complex(columnsToRetrieve);
+		
+		
 		return columnsToRetrieve;
-	}
-
+	}	
 
 	/**	 
-	 * Convert primitive fields into their complex types because the retrieval from Salesforce is from the Complex field
+	 * Get all the data sources that are currently in BigId data base. 
+	 * 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException 
+	 * @throws IOException 
+	 * @throws SecurityException 
+	 * @throws ResponseNotOKException 
+	 * @throws ParseException 
+	 * 
+	 */
+	private JSONArray getCurrentDataSourceFromDB() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, SecurityException, IOException, ParseException, ResponseNotOKException {
+		String uri = URL + API + VERSION + DS_CONNECTIOS;
+
+		HttpGet getRequest = new HttpGet(uri);
+		getRequest.setHeader("Authorization", TOKEN);
+		getRequest.setHeader("Accept", "application/json");
+		getRequest.setHeader("Content-type", "application/json");
+
+		// Set CONNECTION_TIMEOUT seconds timeout for the http call
+		final RequestConfig timeoutParams = RequestConfig.custom().setConnectTimeout(CONNECTION_TIMEOUT).setSocketTimeout(CONNECTION_TIMEOUT).build();
+		getRequest.setConfig(timeoutParams);
+
+		createClient();
+		HttpResponse response = client.execute(getRequest);
+		proccessHttpResponse(response, uri);
+
+		String result = EntityUtils.toString(response.getEntity());
+
+		AppLogger.getLogger().fine("In getColumnsFromCorrelationsets(), result string for uri: " + uri + ":" + result);
+
+		// Set the results into a JSONArray.  
+		JSONArray dataSources  = new JSONObject(result).getJSONArray("ds_connections");
+		return dataSources;
+	}
+
+	/**	 
+	 * Convert primitive fields into their complex types because the retrieval from Salesforce is from the Complex field and the 
+	 * presentatin in correlation page if of the subtypes of the complex field. 
 	 * The method updates columnsToRetrieve list that is sent as a parameter.
 	 * 
 	 * @param ArrayList<CategoryColumnContainer> columnsToRetrieve
@@ -698,8 +918,8 @@ public class BigIdService {
 	private void convertPrimitve2Complex(ArrayList<ColumnToSynch> columnsToRetrieve) throws SecurityException, IOException {
 		AppLogger.getLogger().fine("Beginning of BigIdService.convertPrimitve2Complex(). columnsToRetrieve: " + columnsToRetrieve);
 
-		ArrayList<ColumnToSynch> addressColumns = new ArrayList<ColumnToSynch>();
-		ArrayList<ColumnToSynch> nameColumns = new ArrayList<ColumnToSynch>();
+		ArrayList<ColumnToSynch> primitiveAddressColumns = new ArrayList<ColumnToSynch>();
+		ArrayList<ColumnToSynch> primitiveNameColumns = new ArrayList<ColumnToSynch>();
 
 		// Loop through the list and find the all the primitive columns that are of the type Address or Name
 		for (int i = 0; i < columnsToRetrieve.size(); i++) {
@@ -708,16 +928,16 @@ public class BigIdService {
 					columnsToRetrieve.get(i).getColumnName().contains("PostalCode") ||
 					columnsToRetrieve.get(i).getColumnName().contains("State") ||
 					columnsToRetrieve.get(i).getColumnName().contains("Street")) {
-				addressColumns.add(columnsToRetrieve.get(i));
+				primitiveAddressColumns.add(columnsToRetrieve.get(i));
 			}
 			if (columnsToRetrieve.get(i).getColumnName().contains("FirstName") ||
 					columnsToRetrieve.get(i).getColumnName().contains("LastName")) {
-				nameColumns.add(columnsToRetrieve.get(i));				
+				primitiveNameColumns.add(columnsToRetrieve.get(i));				
 			}			
 		}
 
-		ArrayList<ColumnToSynch> addressPostfix = extractAddressPostfix(addressColumns);
-		ArrayList<ColumnToSynch> namePostfix = extractNamePrefix(nameColumns);
+		ArrayList<ColumnToSynch> addressPostfix = extractAddressPostfix(primitiveAddressColumns);
+		ArrayList<ColumnToSynch> namePostfix = extractNamePrefix(primitiveNameColumns);
 
 		// loop through the list of the primitive Address columns to find if there is the complex field in the list
 		for (int j = 0; j < addressPostfix.size(); j++) {
@@ -737,7 +957,7 @@ public class BigIdService {
 			}
 		}
 		// remove the primitve types from columnsToRetrieve
-		columnsToRetrieve.removeAll(addressColumns);
+		columnsToRetrieve.removeAll(primitiveAddressColumns);
 
 		// loop through the list of the primitive Name columns to find if there is the complex field in the list
 		for (int j = 0; j < namePostfix.size(); j++) {
@@ -757,7 +977,7 @@ public class BigIdService {
 			}
 		}		
 		// remove the primitve types from columnsToRetrieve
-		columnsToRetrieve.removeAll(nameColumns);		
+		columnsToRetrieve.removeAll(primitiveNameColumns);		
 
 		AppLogger.getLogger().fine("End of BigIdService.convertPrimitve2Complex(). columnsToRetrieve: " + columnsToRetrieve);	
 	}
@@ -874,25 +1094,29 @@ public class BigIdService {
 
 			if ( columnName.contains("Address")){				
 				String primitiveName = columnName.substring(0, columnName.length() - 7);
-				primitiveFields.add(new CategoryColumnContainer(primitiveName + "City", currContainer.getTableName() , currContainer.getCategories()));
-				primitiveFields.add(new CategoryColumnContainer(primitiveName + "Country", currContainer.getTableName() , currContainer.getCategories()));
-				primitiveFields.add(new CategoryColumnContainer(primitiveName + "PostalCode", currContainer.getTableName() , currContainer.getCategories()));
-				primitiveFields.add(new CategoryColumnContainer(primitiveName + "State", currContainer.getTableName() , currContainer.getCategories()));
-				primitiveFields.add(new CategoryColumnContainer(primitiveName + "Street", currContainer.getTableName() , currContainer.getCategories()));
+				primitiveFields.add(new CategoryColumnContainer(primitiveName + "City", currContainer.getTableName() , new ArrayList<String>(currContainer.getCategories())));
+				primitiveFields.add(new CategoryColumnContainer(primitiveName + "Country", currContainer.getTableName() , new ArrayList<String>(currContainer.getCategories())));
+				primitiveFields.add(new CategoryColumnContainer(primitiveName + "PostalCode", currContainer.getTableName() , new ArrayList<String>(currContainer.getCategories())));
+				primitiveFields.add(new CategoryColumnContainer(primitiveName + "State", currContainer.getTableName() , new ArrayList<String>(currContainer.getCategories())));
+				primitiveFields.add(new CategoryColumnContainer(primitiveName + "Street", currContainer.getTableName() , new ArrayList<String>(currContainer.getCategories())));
 				complexFieldsToDelete.add(currContainer);
 
 			}
 			if (columnName.contains("Name") ) {				
-				primitiveFields.add(new CategoryColumnContainer("First" + columnName, currContainer.getTableName() , currContainer.getCategories()));
-				primitiveFields.add(new CategoryColumnContainer("Last" + columnName, currContainer.getTableName() , currContainer.getCategories()));
-				complexFieldsToDelete.add(currContainer);
+				primitiveFields.add(new CategoryColumnContainer("First" + columnName, currContainer.getTableName() , new ArrayList<String>(currContainer.getCategories())));
+				primitiveFields.add(new CategoryColumnContainer("Last" + columnName, currContainer.getTableName() , new ArrayList<String>(currContainer.getCategories())));
+				
+				// Name complex field is displayed in BigId's correlation page and Salefore with both its subfields firstName and lastName.
+				// Therefore, I am not deleting this complex field so it will display the category in the correlation page.
+				
+				//complexFieldsToDelete.add(currContainer);
 			}			
 		}
 
 		// Delete the complex fields from complianceGroupToUpdate list 
 		complianceGroupToUpdate.removeAll(complexFieldsToDelete);
 
-		// Add the primitive fields to complianceGroupToUpdate list ONLY IF the do not exist
+		// Add the primitive fields to complianceGroupToUpdate list ONLY IF they do not exist
 		for (int i = 0; i < primitiveFields.size(); i++) {
 			CategoryColumnContainer currPrimitiveContainer = primitiveFields.get(i);
 			boolean contains = false;
@@ -941,7 +1165,7 @@ public class BigIdService {
 			ArrayList<String> complianceGroupValues = complianceGroupToUpdate.get(i).getCategories();
 
 			if (! complianceGroupValues.isEmpty()) {
-				
+
 				// Remove from complianceGroupValues list all the categories that already exist
 				// There is only 1 column in a CategoryColumnContainer.columnNames list so just get the first and only one.
 				ArrayList<JSONObject> previousCategories = getPreviousCategories(complianceGroupToUpdate.get(i).getColumnNames().get(0));
@@ -949,7 +1173,7 @@ public class BigIdService {
 					String currC = previousCategories.get(k).getString("display_name");
 					complianceGroupValues.remove(currC);
 				}				
-				
+
 				// Iterate through the complianceGroupValues list that is holding new complianceGroup values only
 				for (int j = 0; j < complianceGroupValues.size(); j++) {
 
@@ -1007,7 +1231,7 @@ public class BigIdService {
 
 
 	/**	 
-	 * A helper method to get the unique_name of a specific category
+	 * A helper method to get the current categories that are assigned to a specific column
 	 * 
 	 * @param String unique_name, String currentComplianceGroup
 	 * @return void
@@ -1022,33 +1246,10 @@ public class BigIdService {
 	private ArrayList<JSONObject> getPreviousCategories(String column) throws SecurityException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, ParseException, ResponseNotOKException {
 		AppLogger.getLogger().fine("Beginning of getPreviousCategories()");
 
-		String uri = URL + "/api/v1/lineage/attributes";
-
-		HttpGet getRequest = new HttpGet(uri);
-		getRequest.setHeader("Authorization", TOKEN);
-		getRequest.setHeader("Accept", "application/json");
-		getRequest.setHeader("Content-type", "application/json");
-
-		// Set CONNECTION_TIMEOUT secondes timeout for the http call
-		final RequestConfig timeoutParams = RequestConfig.custom().setConnectTimeout(CONNECTION_TIMEOUT).setSocketTimeout(CONNECTION_TIMEOUT).build();
-		getRequest.setConfig(timeoutParams);
-
-		createClient();
-		HttpResponse response = client.execute(getRequest);
-		proccessHttpResponse(response, uri);
-
-		String result = EntityUtils.toString(response.getEntity());
-
-		AppLogger.getLogger().finer("In getPreviousCategories(), result string for uri: " + uri + ":" + result);
-
 		ArrayList<JSONObject> previousCategories = new ArrayList<JSONObject>();
 
-		// Go down the Jsonobject hierarchy until reaching the list of attributes and their categories.
-		JSONObject Jresult  = new JSONObject(result);
-		JSONArray data = Jresult.getJSONArray("data");
-		JSONObject jArrayData = data.getJSONObject(0);
-		JSONObject attributes = jArrayData.getJSONObject("attributes");
-		JSONArray idsor_attributes = attributes.getJSONArray("idsor_attributes");
+		JSONArray idsor_attributes = getCurrentAttributes();
+
 		for (int i = 0; i < idsor_attributes.length(); i++) {
 			String friendly_name = idsor_attributes.getJSONObject(i).getString("friendly_name");
 			if (friendly_name.equals(column)) {
